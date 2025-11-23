@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AniManga Tracker PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { 
@@ -18,8 +17,8 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #ffffff;
-            color: #333333;
+            background: #0a0a0a;
+            color: #ffffff;
             min-height: 100vh;
             overflow-x: hidden;
             font-size: 14px;
@@ -28,39 +27,39 @@
         .container {
             width: 100%;
             max-width: 100%;
-            padding: 10px;
+            padding: 12px;
             padding-bottom: 70px;
         }
 
         .header {
-            background: #8774e1;
+            background: #1a1a1a;
             color: white;
-            padding: 15px;
+            padding: 16px;
             text-align: center;
             border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            border: 1px solid #2a2a2a;
         }
 
         .header h1 {
             font-size: 18px;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             font-weight: 700;
         }
 
         .header p {
             font-size: 12px;
-            opacity: 0.9;
+            opacity: 0.8;
         }
 
         .tabs {
             display: flex;
-            background: #f8f9fa;
+            background: #1a1a1a;
             border-radius: 10px;
             padding: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
             gap: 4px;
-            font-size: 12px;
+            border: 1px solid #2a2a2a;
         }
 
         .tab {
@@ -73,7 +72,8 @@
             transition: all 0.2s ease;
             background: transparent;
             border: none;
-            color: #666;
+            color: #888;
+            font-size: 12px;
         }
 
         .tab.active {
@@ -85,7 +85,7 @@
             background: #8774e1;
             color: white;
             border: none;
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
@@ -96,7 +96,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .btn:active {
@@ -104,36 +104,30 @@
             transform: scale(0.98);
         }
 
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #333;
-            border: 1px solid #e0e0e0;
-        }
-
         .card {
-            background: #f8f9fa;
+            background: #1a1a1a;
             border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #2a2a2a;
         }
 
         .anime-item, .manga-item {
-            background: #f8f9fa;
+            background: #1a1a1a;
             border-radius: 12px;
-            padding: 12px;
+            padding: 14px;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #2a2a2a;
         }
 
         .cover {
             width: 50px;
             height: 65px;
             border-radius: 8px;
-            background: #e0e0e0;
+            background: #2a2a2a;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -151,15 +145,15 @@
 
         .title {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             margin-bottom: 6px;
-            color: #333;
+            color: #fff;
             line-height: 1.2;
         }
 
         .progress-bar {
             height: 4px;
-            background: #e0e0e0;
+            background: #2a2a2a;
             border-radius: 2px;
             margin: 8px 0;
             overflow: hidden;
@@ -179,24 +173,25 @@
         }
 
         .action-btn {
-            padding: 8px;
+            padding: 10px;
             border: none;
             border-radius: 6px;
-            background: white;
-            color: #333;
+            background: #2a2a2a;
+            color: #fff;
             cursor: pointer;
             font-size: 12px;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 36px;
-            min-height: 36px;
-            border: 1px solid #e0e0e0;
+            min-width: 40px;
+            min-height: 40px;
+            border: 1px solid #3a3a3a;
         }
 
         .action-btn:active {
             transform: scale(0.95);
+            background: #3a3a3a;
         }
 
         .modal {
@@ -205,48 +200,54 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.8);
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 16px;
             z-index: 1000;
         }
 
         .modal-content {
-            background: white;
+            background: #1a1a1a;
             border-radius: 16px;
             padding: 20px;
             width: 100%;
             max-width: 400px;
             max-height: 85vh;
             overflow-y: auto;
+            border: 1px solid #2a2a2a;
         }
 
         .form-control {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
+            padding: 14px;
+            border: 1px solid #2a2a2a;
             border-radius: 8px;
             font-size: 14px;
-            background: white;
-            color: #333;
+            background: #0a0a0a;
+            color: #fff;
             margin-bottom: 12px;
+        }
+
+        .form-control:focus {
+            border-color: #8774e1;
+            outline: none;
         }
 
         .stars {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             justify-content: center;
             margin: 12px 0;
         }
 
         .star {
-            font-size: 20px;
-            color: #ddd;
+            font-size: 24px;
+            color: #444;
             cursor: pointer;
             transition: color 0.2s;
-            padding: 3px;
+            padding: 4px;
         }
 
         .star.active {
@@ -255,9 +256,9 @@
 
         .status-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 12px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: white;
             margin-right: 6px;
@@ -272,15 +273,15 @@
         }
 
         .status-tab {
-            padding: 6px 12px;
+            padding: 8px 12px;
             border-radius: 16px;
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            border: 1px solid #e0e0e0;
-            background: #f8f9fa;
-            color: #333;
+            border: 1px solid #2a2a2a;
+            background: #1a1a1a;
+            color: #fff;
             transition: all 0.2s ease;
         }
 
@@ -298,19 +299,20 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 50px;
-            height: 50px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             background: #8774e1;
             color: white;
             border: none;
             font-size: 20px;
             cursor: pointer;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
         }
 
         .floating-btn:active {
@@ -321,7 +323,7 @@
             background: #02a9ff;
             color: white;
             border: none;
-            padding: 12px;
+            padding: 14px;
             border-radius: 8px;
             cursor: pointer;
             margin: 12px 0;
@@ -329,7 +331,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
             font-size: 14px;
             font-weight: 600;
         }
@@ -340,69 +342,72 @@
         }
 
         .search-results {
-            max-height: 150px;
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #2a2a2a;
             border-radius: 8px;
             margin-top: 8px;
             display: none;
+            background: #0a0a0a;
         }
 
         .search-result-item {
-            padding: 10px;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 12px;
+            border-bottom: 1px solid #2a2a2a;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
+            transition: background 0.2s ease;
         }
 
         .search-result-item:active {
-            background: #f0f0f0;
+            background: #2a2a2a;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 15px 0;
+            gap: 10px;
+            margin: 16px 0;
         }
 
         .stat-card {
-            background: white;
-            padding: 12px;
+            background: #0a0a0a;
+            padding: 16px;
             border-radius: 8px;
             text-align: center;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #2a2a2a;
         }
 
         .stat-value {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #8774e1;
         }
 
         .stat-label {
-            font-size: 10px;
-            color: #666;
+            font-size: 11px;
+            color: #888;
             margin-top: 4px;
         }
 
         .quick-actions {
             display: flex;
             gap: 6px;
-            margin-top: 8px;
+            margin-top: 10px;
         }
 
         .quick-action-btn {
             flex: 1;
-            padding: 6px;
-            border: 1px solid #e0e0e0;
+            padding: 8px;
+            border: 1px solid #2a2a2a;
             border-radius: 6px;
-            background: white;
-            color: #333;
+            background: #0a0a0a;
+            color: #fff;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             text-align: center;
+            transition: all 0.2s ease;
         }
 
         .quick-action-btn:active {
@@ -414,8 +419,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
         }
 
         .switch {
@@ -438,7 +443,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background-color: #2a2a2a;
             transition: .4s;
             border-radius: 24px;
         }
@@ -466,19 +471,21 @@
         .language-switcher {
             display: flex;
             gap: 8px;
-            margin: 15px 0;
+            margin: 16px 0;
         }
 
         .lang-btn {
             flex: 1;
-            padding: 8px;
-            border: 1px solid #e0e0e0;
+            padding: 10px;
+            border: 1px solid #2a2a2a;
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
-            background: #f8f9fa;
+            background: #1a1a1a;
+            color: #fff;
+            transition: all 0.2s ease;
         }
 
         .lang-btn.active {
@@ -490,62 +497,46 @@
         .color-picker {
             display: flex;
             gap: 8px;
-            margin: 10px 0;
+            margin: 12px 0;
+            flex-wrap: wrap;
         }
 
         .color-option {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 6px;
             cursor: pointer;
             border: 2px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .color-option.selected {
-            border-color: #333;
+            border-color: #fff;
+            transform: scale(1.1);
         }
 
-        /* ТЕМНАЯ ТЕМА */
+        /* Убираем светлую тему, оставляем только темную */
         .dark-theme {
-            background: #1a1a1a;
+            background: #0a0a0a;
             color: #ffffff;
         }
-        .dark-theme .card { background: #2d2d2d; }
-        .dark-theme .btn-secondary { background: #2d2d2d; color: #fff; border-color: #404040; }
-        .dark-theme .tabs { background: #2d2d2d; }
-        .dark-theme .tab { color: #aaa; }
-        .dark-theme .anime-item, .dark-theme .manga-item { background: #2d2d2d; border-color: #404040; }
-        .dark-theme .cover { background: #404040; color: #aaa; }
-        .dark-theme .title { color: #fff; }
-        .dark-theme .progress-bar { background: #404040; }
-        .dark-theme .action-btn { background: #1a1a1a; color: #fff; border-color: #404040; }
-        .dark-theme .modal-content { background: #2d2d2d; color: #fff; }
-        .dark-theme .form-control { background: #1a1a1a; border-color: #404040; color: #fff; }
-        .dark-theme .status-tab { background: #2d2d2d; border-color: #404040; color: #fff; }
-        .dark-theme .stat-card { background: #1a1a1a; border-color: #404040; }
-        .dark-theme .quick-action-btn { background: #1a1a1a; border-color: #404040; color: #fff; }
-        .dark-theme .search-results { border-color: #404040; background: #1a1a1a; }
-        .dark-theme .search-result-item { border-bottom-color: #404040; }
-        .dark-theme .search-result-item:active { background: #404040; }
-        .dark-theme .settings-item { border-bottom-color: #404040; }
-        .dark-theme .lang-btn { background: #2d2d2d; border-color: #404040; color: #fff; }
 
         @media (max-width: 480px) {
-            .container { padding: 8px; padding-bottom: 60px; }
-            .header { padding: 12px; }
+            .container { padding: 10px; padding-bottom: 60px; }
+            .header { padding: 14px; }
             .header h1 { font-size: 16px; }
             .tab { padding: 8px 6px; font-size: 11px; }
-            .btn { padding: 10px 12px; font-size: 13px; }
-            .anime-item, .manga-item { padding: 10px; }
+            .btn { padding: 12px 14px; font-size: 13px; }
+            .anime-item, .manga-item { padding: 12px; }
             .cover { width: 45px; height: 60px; }
-            .floating-btn { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 18px; }
+            .floating-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; }
         }
     </style>
 </head>
-<body>
+<body class="dark-theme">
     <div class="container">
         <div class="header">
-            <h1>🎌 AniManga Tracker</h1>
+            <h1>🎌 AniManga Tracker PRO</h1>
             <p>Отслеживай аниме и мангу</p>
         </div>
 
@@ -579,27 +570,27 @@
 
         <div id="statuses-tab" class="tab-content hidden">
             <div class="card">
-                <h3 style="margin-bottom: 12px; font-size: 16px;">🎯 Управление статусами</h3>
-                <p style="color: #666; margin-bottom: 15px; font-size: 12px;">Создавайте статусы для сортировки</p>
-                <button class="btn" onclick="showAddStatusForm()" style="padding: 10px;">
+                <h3 style="margin-bottom: 12px;">🎯 Управление статусами</h3>
+                <p style="color: #888; margin-bottom: 16px;">Создавайте статусы для сортировки</p>
+                <button class="btn" onclick="showAddStatusForm()">
                     <i class="fas fa-plus"></i> Создать статус
                 </button>
             </div>
             
             <div class="card">
-                <h4 style="margin-bottom: 12px; font-size: 14px;">📊 Стандартные статусы</h4>
+                <h4 style="margin-bottom: 12px;">📊 Стандартные статусы</h4>
                 <div id="default-statuses-list"></div>
             </div>
             
             <div class="card">
-                <h4 style="margin-bottom: 12px; font-size: 14px;">🎨 Пользовательские статусы</h4>
+                <h4 style="margin-bottom: 12px;">🎨 Пользовательские статусы</h4>
                 <div id="custom-statuses-list"></div>
             </div>
         </div>
 
         <div id="stats-tab" class="tab-content hidden">
             <div class="card">
-                <h3 style="margin-bottom: 12px; font-size: 16px;">📊 Статистика</h3>
+                <h3 style="margin-bottom: 16px;">📊 Статистика</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="total-anime">0</div>
@@ -619,46 +610,16 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="card">
-                <h4 style="margin-bottom: 12px; font-size: 14px;">📈 Дополнительная статистика</h4>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="completed-count">0</div>
-                        <div class="stat-label">Завершено</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="watching-count">0</div>
-                        <div class="stat-label">Смотрю</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="planned-count">0</div>
-                        <div class="stat-label">В планах</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="average-rating">0</div>
-                        <div class="stat-label">Средний рейтинг</div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div id="settings-tab" class="tab-content hidden">
             <div class="card">
-                <h3 style="margin-bottom: 15px; font-size: 16px;">⚙️ Настройки</h3>
+                <h3 style="margin-bottom: 16px;">⚙️ Настройки</h3>
                 
-                <div class="settings-item">
-                    <span>🌙 Тёмная тема</span>
-                    <label class="switch">
-                        <input type="checkbox" id="theme-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
                 <div class="settings-item">
                     <span>🔔 Уведомления</span>
                     <label class="switch">
-                        <input type="checkbox" id="notifications-toggle">
+                        <input type="checkbox" id="notifications-toggle" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -666,54 +627,31 @@
                 <div class="settings-item">
                     <span>💾 Авто-бэкап</span>
                     <label class="switch">
-                        <input type="checkbox" id="backup-toggle">
+                        <input type="checkbox" id="backup-toggle" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
                 
-                <div style="margin: 15px 0;">
+                <div style="margin: 16px 0;">
                     <div style="font-weight: 600; margin-bottom: 8px;">Язык</div>
                     <div class="language-switcher">
                         <div class="lang-btn active" onclick="switchLanguage('ru')">Русский</div>
                         <div class="lang-btn" onclick="switchLanguage('en')">English</div>
                     </div>
                 </div>
-
-                <div style="margin: 15px 0;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">Размер текста</div>
-                    <div class="language-switcher">
-                        <div class="lang-btn active" onclick="changeFontSize('small')">Мелкий</div>
-                        <div class="lang-btn" onclick="changeFontSize('medium')">Средний</div>
-                        <div class="lang-btn" onclick="changeFontSize('large')">Крупный</div>
-                    </div>
-                </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0;">
-                    <button class="btn btn-secondary" onclick="exportData()">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
+                    <button class="btn" onclick="exportData()">
                         <i class="fas fa-download"></i> Экспорт
                     </button>
-                    <button class="btn btn-secondary" onclick="importData()">
+                    <button class="btn" onclick="importData()">
                         <i class="fas fa-upload"></i> Импорт
                     </button>
                 </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
-                    <button class="btn btn-secondary" onclick="clearCache()">
-                        <i class="fas fa-broom"></i> Очистить кэш
-                    </button>
-                    <button class="btn btn-secondary" onclick="resetSettings()">
-                        <i class="fas fa-redo"></i> Сбросить настройки
-                    </button>
-                </div>
                 
-                <button class="btn" onclick="clearAllData()" style="background: #f44336; margin-top: 10px;">
+                <button class="btn" onclick="clearAllData()" style="background: #d32f2f; margin-top: 8px;">
                     <i class="fas fa-trash"></i> Очистить все данные
                 </button>
-
-                <div style="text-align: center; margin-top: 15px; color: #666; font-size: 11px;">
-                    Версия 2.1.0<br>
-                    <span id="storage-info">Загрузка...</span>
-                </div>
             </div>
         </div>
     </div>
@@ -725,12 +663,12 @@
     <!-- Модальные окна -->
     <div id="quick-add-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 15px;">Быстрое добавление</h3>
-            <div style="display: flex; gap: 8px; margin-top: 15px;">
-                <button class="btn" onclick="showAddForm('anime'); hideQuickAddMenu();" style="flex: 1;">
+            <h3 style="margin-bottom: 16px;">Быстрое добавление</h3>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn" onclick="showAddForm('anime'); hideQuickAddMenu();">
                     <i class="fas fa-tv"></i> Аниме
                 </button>
-                <button class="btn" onclick="showAddForm('manga'); hideQuickAddMenu();" style="flex: 1;">
+                <button class="btn" onclick="showAddForm('manga'); hideQuickAddMenu();">
                     <i class="fas fa-book"></i> Манга
                 </button>
             </div>
@@ -742,20 +680,22 @@
 
     <div id="item-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 15px;" id="modal-title">Добавить аниме</h3>
+            <h3 style="margin-bottom: 16px;" id="modal-title">Добавить аниме</h3>
             
             <button class="anilist-search-btn" onclick="showAniListSearch()">
                 <i class="fas fa-search"></i> Поиск в AniList
             </button>
             
-            <input type="text" id="item-title" class="form-control" placeholder="Название">
-            <input type="text" id="item-cover" class="form-control" placeholder="URL обложки">
-            <input type="number" id="item-total" class="form-control" placeholder="Всего эпизодов/глав">
-            <input type="number" id="item-progress" class="form-control" placeholder="Текущий прогресс" value="0">
+            <input type="text" id="item-title" class="form-control" placeholder="Название" required>
+            <input type="text" id="item-cover" class="form-control" placeholder="URL обложки (опционально)">
+            <input type="number" id="item-total" class="form-control" placeholder="Всего эпизодов/глав" min="0">
+            <input type="number" id="item-progress" class="form-control" placeholder="Текущий прогресс" value="0" min="0">
             
-            <select id="item-status" class="form-control"></select>
+            <select id="item-status" class="form-control" required>
+                <option value="">Выберите статус</option>
+            </select>
 
-            <div style="text-align: center; margin: 10px 0; font-weight: 600;">Рейтинг</div>
+            <div style="text-align: center; margin: 12px 0; font-weight: 600;">Рейтинг</div>
             <div class="stars" id="rating-stars">
                 <span class="star" data-rating="1">★</span>
                 <span class="star" data-rating="2">★</span>
@@ -771,31 +711,21 @@
         </div>
     </div>
 
-    <div id="anilist-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 15px;">Поиск в AniList</h3>
-            <input type="text" id="anilist-search" class="form-control" placeholder="Введите название..." oninput="searchAniList()">
-            <div id="anilist-results" class="search-results"></div>
-            <button class="btn" onclick="hideAniListSearch()" style="background: #666; margin-top: 15px;">
-                Назад
-            </button>
-        </div>
-    </div>
-
     <div id="status-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 15px;" id="status-modal-title">Создать статус</h3>
-            <input type="text" id="status-name" class="form-control" placeholder="Название статуса">
+            <h3 style="margin-bottom: 16px;" id="status-modal-title">Создать статус</h3>
+            <input type="text" id="status-name" class="form-control" placeholder="Название статуса" required>
             
-            <div style="font-weight: 600; margin: 10px 0 5px;">Цвет статуса</div>
+            <div style="font-weight: 600; margin: 12px 0 8px;">Цвет статуса</div>
             <div class="color-picker">
                 <div class="color-option selected" style="background: #8774e1;" data-color="#8774e1"></div>
                 <div class="color-option" style="background: #4caf50;" data-color="#4caf50"></div>
                 <div class="color-option" style="background: #ff9800;" data-color="#ff9800"></div>
                 <div class="color-option" style="background: #f44336;" data-color="#f44336"></div>
                 <div class="color-option" style="background: #2196f3;" data-color="#2196f3"></div>
+                <div class="color-option" style="background: #9c27b0;" data-color="#9c27b0"></div>
             </div>
-            <input type="text" id="status-color" class="form-control" placeholder="HEX код цвета" value="#8774e1">
+            <input type="text" id="status-color" class="form-control" placeholder="Или введите HEX код" value="#8774e1">
 
             <div style="display: flex; gap: 8px; margin-top: 20px;">
                 <button class="btn" onclick="saveStatus()" style="flex: 2;">Сохранить</button>
@@ -807,8 +737,8 @@
     <input type="file" id="import-file" accept=".json" style="display: none;">
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ
-        console.log('🚀 AniManga Tracker - Compact Version');
+        // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+        console.log('🚀 AniManga Tracker PRO - Fixed Version');
         
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -833,18 +763,20 @@
 
         // Загрузка приложения
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Загрузка приложения...');
             initApp();
             setupEventListeners();
-            updateStorageInfo();
         });
 
         function initApp() {
+            console.log('🔄 Инициализация...');
             loadData();
             loadSettings();
             renderLists();
             updateStats();
             renderStatusTabs();
             renderStatusesList();
+            console.log('✅ Приложение загружено');
         }
 
         function setupEventListeners() {
@@ -855,13 +787,7 @@
                 });
             });
 
-            // Переключатель темы
-            document.getElementById('theme-toggle').addEventListener('change', function() {
-                toggleTheme(this.checked);
-                saveSettings();
-            });
-
-            // Другие переключатели
+            // Переключатели
             document.getElementById('notifications-toggle').addEventListener('change', saveSettings);
             document.getElementById('backup-toggle').addEventListener('change', saveSettings);
 
@@ -907,13 +833,18 @@
         }
 
         function switchTab(tabName) {
+            console.log('🔄 Переключение на вкладку:', tabName);
+            
             // Скрыть все вкладки
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.add('hidden');
             });
             
             // Показать выбранную вкладку
-            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
             
             // Обновить активную вкладку
             document.querySelectorAll('.tab').forEach(tab => {
@@ -926,43 +857,31 @@
                 updateStats();
             } else if (tabName === 'statuses') {
                 renderStatusesList();
+            } else if (tabName === 'anime' || tabName === 'manga') {
+                renderStatusTabs();
             }
-            
-            updateStorageInfo();
-        }
-
-        function toggleTheme(isDark) {
-            document.body.classList.toggle('dark-theme', isDark);
         }
 
         function loadSettings() {
             const settings = JSON.parse(localStorage.getItem('animanga_settings') || '{}');
             
-            // Тема
-            const themeToggle = document.getElementById('theme-toggle');
-            themeToggle.checked = settings.theme === 'dark';
-            toggleTheme(themeToggle.checked);
-            
             // Уведомления
             const notificationsToggle = document.getElementById('notifications-toggle');
-            notificationsToggle.checked = settings.notifications !== false;
+            if (notificationsToggle) {
+                notificationsToggle.checked = settings.notifications !== false;
+            }
             
             // Бэкап
             const backupToggle = document.getElementById('backup-toggle');
-            backupToggle.checked = settings.autoBackup !== false;
-            
-            // Размер шрифта
-            if (settings.fontSize) {
-                changeFontSize(settings.fontSize, false);
+            if (backupToggle) {
+                backupToggle.checked = settings.autoBackup !== false;
             }
         }
 
         function saveSettings() {
             const settings = {
-                theme: document.getElementById('theme-toggle').checked ? 'dark' : 'light',
                 notifications: document.getElementById('notifications-toggle').checked,
-                autoBackup: document.getElementById('backup-toggle').checked,
-                fontSize: document.body.dataset.fontSize || 'small'
+                autoBackup: document.getElementById('backup-toggle').checked
             };
             localStorage.setItem('animanga_settings', JSON.stringify(settings));
         }
@@ -972,19 +891,7 @@
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
-            alert(`Язык изменен на ${lang === 'ru' ? 'русский' : 'english'}`);
-        }
-
-        function changeFontSize(size, save = true) {
-            document.body.dataset.fontSize = size;
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            if (save) {
-                saveSettings();
-            }
+            alert(`🌐 Язык изменен на ${lang === 'ru' ? 'русский' : 'english'}`);
         }
 
         function showQuickAddMenu() {
@@ -996,13 +903,14 @@
         }
 
         function showAddForm(type) {
+            console.log('📝 Открытие формы для:', type);
             currentType = type;
             editingItemId = null;
             document.getElementById('modal-title').textContent = type === 'anime' ? 'Добавить аниме' : 'Добавить мангу';
             
             // Заполнить статусы
             const statusSelect = document.getElementById('item-status');
-            statusSelect.innerHTML = '';
+            statusSelect.innerHTML = '<option value="">Выберите статус</option>';
             const userData = getUserData();
             userData.statuses.forEach(status => {
                 const option = document.createElement('option');
@@ -1016,7 +924,7 @@
             document.getElementById('item-cover').value = '';
             document.getElementById('item-total').value = '';
             document.getElementById('item-progress').value = '0';
-            document.getElementById('item-status').value = 'watching';
+            document.getElementById('item-status').value = '';
             setRating(0);
             
             document.getElementById('item-modal').style.display = 'flex';
@@ -1041,7 +949,12 @@
             const status = document.getElementById('item-status').value;
 
             if (!title) {
-                alert('Введите название');
+                alert('❌ Введите название');
+                return;
+            }
+
+            if (!status) {
+                alert('❌ Выберите статус');
                 return;
             }
 
@@ -1056,6 +969,7 @@
                         lastUpdated: new Date().toISOString()
                     };
                 }
+                editingItemId = null;
             } else {
                 // Добавление
                 currentData.push({
@@ -1071,7 +985,7 @@
             renderLists();
             renderStatusTabs();
             hideModal();
-            alert('✅ Сохранено!');
+            alert('✅ Успешно сохранено!');
         }
 
         function editItem(itemId) {
@@ -1091,7 +1005,7 @@
         }
 
         function deleteItem(itemId) {
-            if (confirm('Удалить этот элемент?')) {
+            if (confirm('❓ Удалить этот элемент?')) {
                 currentData = currentData.filter(item => item.id !== itemId);
                 saveData();
                 renderLists();
@@ -1130,10 +1044,16 @@
             const defaultData = { statuses: defaultStatuses };
             try {
                 const stored = localStorage.getItem('animanga_settings');
-                return stored ? JSON.parse(stored) : defaultData;
-            } catch {
-                return defaultData;
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    if (data.statuses) {
+                        return data;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
             }
+            return defaultData;
         }
 
         function saveUserData(data) {
@@ -1144,14 +1064,16 @@
             try {
                 const saved = localStorage.getItem('animanga_data');
                 currentData = saved ? JSON.parse(saved) : [];
-            } catch {
+                console.log('📊 Загружено записей:', currentData.length);
+            } catch (error) {
                 currentData = [];
+                console.error('Error loading data:', error);
             }
         }
 
         function saveData() {
             localStorage.setItem('animanga_data', JSON.stringify(currentData));
-            updateStorageInfo();
+            console.log('💾 Данные сохранены, записей:', currentData.length);
         }
 
         function renderLists() {
@@ -1169,11 +1091,11 @@
             
             if (items.length === 0) {
                 container.innerHTML = `
-                    <div class="card" style="text-align: center; color: #666;">
-                        <i class="fas fa-tv" style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;"></i>
-                        <div style="font-size: 12px; margin-bottom: 10px;">Нет добавленных аниме</div>
-                        <button class="btn" onclick="showAddForm('anime')" style="padding: 8px 12px;">
-                            <i class="fas fa-plus"></i> Добавить аниме
+                    <div class="card" style="text-align: center; color: #888;">
+                        <i class="fas fa-tv" style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;"></i>
+                        <div style="margin-bottom: 12px;">Нет добавленных аниме</div>
+                        <button class="btn" onclick="showAddForm('anime')">
+                            <i class="fas fa-plus"></i> Добавить первое аниме
                         </button>
                     </div>
                 `;
@@ -1195,14 +1117,14 @@
                         }
                         <div style="flex: 1;">
                             <div class="title">${item.title}</div>
-                            <div style="font-size: 11px; color: #666; margin-bottom: 6px;">
+                            <div style="font-size: 12px; color: #888; margin-bottom: 6px;">
                                 <span class="status-badge" style="background: ${statusInfo.color};">${statusInfo.name}</span>
                                 ${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : ''}
                             </div>
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${progressPercent}%"></div>
                             </div>
-                            <div style="font-size: 11px; color: #666;">
+                            <div style="font-size: 12px; color: #888;">
                                 ${item.progress}/${item.total || '?'} эпизодов
                             </div>
                             <div class="quick-actions">
@@ -1235,11 +1157,11 @@
             
             if (items.length === 0) {
                 container.innerHTML = `
-                    <div class="card" style="text-align: center; color: #666;">
-                        <i class="fas fa-book" style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;"></i>
-                        <div style="font-size: 12px; margin-bottom: 10px;">Нет добавленной манги</div>
-                        <button class="btn" onclick="showAddForm('manga')" style="padding: 8px 12px;">
-                            <i class="fas fa-plus"></i> Добавить мангу
+                    <div class="card" style="text-align: center; color: #888;">
+                        <i class="fas fa-book" style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;"></i>
+                        <div style="margin-bottom: 12px;">Нет добавленной манги</div>
+                        <button class="btn" onclick="showAddForm('manga')">
+                            <i class="fas fa-plus"></i> Добавить первую мангу
                         </button>
                     </div>
                 `;
@@ -1261,14 +1183,14 @@
                         }
                         <div style="flex: 1;">
                             <div class="title">${item.title}</div>
-                            <div style="font-size: 11px; color: #666; margin-bottom: 6px;">
+                            <div style="font-size: 12px; color: #888; margin-bottom: 6px;">
                                 <span class="status-badge" style="background: ${statusInfo.color};">${statusInfo.name}</span>
                                 ${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : ''}
                             </div>
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${progressPercent}%"></div>
                             </div>
-                            <div style="font-size: 11px; color: #666;">
+                            <div style="font-size: 12px; color: #888;">
                                 ${item.progress}/${item.total || '?'} глав
                             </div>
                             <div class="quick-actions">
@@ -1306,7 +1228,8 @@
             
             userData.statuses.forEach(status => {
                 const count = items.filter(item => item.status === status.id).length;
-                html += `<div class="status-tab ${selectedStatus === status.id ? 'active' : ''}" onclick="switchStatusTab('${status.id}', 'anime')" style="border-color: ${status.color}; ${selectedStatus === status.id ? `background: ${status.color};` : ''}">${status.name} (${count})</div>`;
+                const isActive = selectedStatus === status.id;
+                html += `<div class="status-tab ${isActive ? 'active' : ''}" onclick="switchStatusTab('${status.id}', 'anime')" style="border-color: ${status.color}; ${isActive ? `background: ${status.color};` : ''}">${status.name} (${count})</div>`;
             });
             
             container.innerHTML = html;
@@ -1322,7 +1245,8 @@
             
             userData.statuses.forEach(status => {
                 const count = items.filter(item => item.status === status.id).length;
-                html += `<div class="status-tab ${selectedStatus === status.id ? 'active' : ''}" onclick="switchStatusTab('${status.id}', 'manga')" style="border-color: ${status.color}; ${selectedStatus === status.id ? `background: ${status.color};` : ''}">${status.name} (${count})</div>`;
+                const isActive = selectedStatus === status.id;
+                html += `<div class="status-tab ${isActive ? 'active' : ''}" onclick="switchStatusTab('${status.id}', 'manga')" style="border-color: ${status.color}; ${isActive ? `background: ${status.color};` : ''}">${status.name} (${count})</div>`;
             });
             
             container.innerHTML = html;
@@ -1361,7 +1285,12 @@
         function saveStatus() {
             const name = document.getElementById('status-name').value.trim();
             if (!name) {
-                alert('Введите название статуса');
+                alert('❌ Введите название статуса');
+                return;
+            }
+            
+            if (!selectedColor) {
+                alert('❌ Выберите цвет статуса');
                 return;
             }
             
@@ -1386,6 +1315,7 @@
             renderStatusesList();
             renderStatusTabs();
             renderLists();
+            alert('✅ Статус сохранен!');
         }
 
         function renderStatusesList() {
@@ -1398,12 +1328,12 @@
                 const countAnime = currentData.filter(item => item.type === 'anime' && item.status === status.id).length;
                 const countManga = currentData.filter(item => item.type === 'manga' && item.status === status.id).length;
                 html += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 12px; height: 12px; border-radius: 50%; background: ${status.color};"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #2a2a2a;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 14px; height: 14px; border-radius: 50%; background: ${status.color};"></div>
                             <div>${status.name}</div>
                         </div>
-                        <div style="font-size: 11px; color: #666;">${countAnime} аниме • ${countManga} манга</div>
+                        <div style="font-size: 11px; color: #888;">${countAnime} аниме • ${countManga} манга</div>
                     </div>
                 `;
             });
@@ -1414,24 +1344,24 @@
             const customStatuses = userData.statuses.filter(s => !s.isDefault);
             html = '';
             if (customStatuses.length === 0) {
-                html = '<div style="text-align: center; color: #666; padding: 20px; font-size: 12px;">Нет пользовательских статусов</div>';
+                html = '<div style="text-align: center; color: #888; padding: 20px; font-size: 13px;">Нет пользовательских статусов</div>';
             } else {
                 customStatuses.forEach(status => {
                     const countAnime = currentData.filter(item => item.type === 'anime' && item.status === status.id).length;
                     const countManga = currentData.filter(item => item.type === 'manga' && item.status === status.id).length;
                     html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background: ${status.color};"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #2a2a2a;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 14px; height: 14px; border-radius: 50%; background: ${status.color};"></div>
                                 <div>${status.name}</div>
                             </div>
-                            <div style="display: flex; gap: 5px; align-items: center;">
-                                <div style="font-size: 11px; color: #666;">${countAnime} аниме • ${countManga} манга</div>
-                                <button class="action-btn" onclick="editStatus('${status.id}')" style="min-width: 30px; min-height: 30px; padding: 5px;">
-                                    <i class="fas fa-edit" style="font-size: 10px;"></i>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <div style="font-size: 11px; color: #888;">${countAnime} аниме • ${countManga} манга</div>
+                                <button class="action-btn" onclick="editStatus('${status.id}')" style="min-width: 32px; min-height: 32px; padding: 6px;">
+                                    <i class="fas fa-edit" style="font-size: 11px;"></i>
                                 </button>
-                                <button class="action-btn" onclick="deleteStatus('${status.id}')" style="min-width: 30px; min-height: 30px; padding: 5px; color: #f44336;">
-                                    <i class="fas fa-trash" style="font-size: 10px;"></i>
+                                <button class="action-btn" onclick="deleteStatus('${status.id}')" style="min-width: 32px; min-height: 32px; padding: 6px; color: #f44336;">
+                                    <i class="fas fa-trash" style="font-size: 11px;"></i>
                                 </button>
                             </div>
                         </div>
@@ -1461,7 +1391,7 @@
         }
 
         function deleteStatus(statusId) {
-            if (confirm('Удалить этот статус? Элементы будут перемещены в статус "Смотрю".')) {
+            if (confirm('❓ Удалить этот статус? Элементы будут перемещены в статус "Смотрю".')) {
                 const userData = getUserData();
                 currentData.forEach(item => {
                     if (item.status === statusId) {
@@ -1480,33 +1410,11 @@
         function updateStats() {
             const animeItems = currentData.filter(item => item.type === 'anime');
             const mangaItems = currentData.filter(item => item.type === 'manga');
-            const allItems = [...animeItems, ...mangaItems];
             
             document.getElementById('total-anime').textContent = animeItems.length;
             document.getElementById('total-manga').textContent = mangaItems.length;
             document.getElementById('total-episodes').textContent = animeItems.reduce((sum, item) => sum + (item.progress || 0), 0);
             document.getElementById('total-chapters').textContent = mangaItems.reduce((sum, item) => sum + (item.progress || 0), 0);
-            
-            // Дополнительная статистика
-            document.getElementById('completed-count').textContent = allItems.filter(item => item.status === 'completed').length;
-            document.getElementById('watching-count').textContent = allItems.filter(item => item.status === 'watching').length;
-            document.getElementById('planned-count').textContent = allItems.filter(item => item.status === 'planned').length;
-            
-            const ratedItems = allItems.filter(item => item.rating > 0);
-            const averageRating = ratedItems.length > 0 ? 
-                (ratedItems.reduce((sum, item) => sum + item.rating, 0) / ratedItems.length).toFixed(1) : '0';
-            document.getElementById('average-rating').textContent = averageRating;
-        }
-
-        function updateStorageInfo() {
-            let size = 0;
-            for (let key in localStorage) {
-                if (localStorage.hasOwnProperty(key)) {
-                    size += localStorage[key].length;
-                }
-            }
-            const kb = (size / 1024).toFixed(1);
-            document.getElementById('storage-info').textContent = `Использовано: ${kb} KB`;
         }
 
         function exportData() {
@@ -1526,64 +1434,28 @@
             a.click();
             
             URL.revokeObjectURL(url);
+            alert('✅ Данные экспортированы!');
         }
 
         function importData() {
             document.getElementById('import-file').click();
         }
 
-        function clearCache() {
-            if (confirm('Очистить кэш приложения?')) {
-                // Можно добавить очистку кэша изображений и т.д.
-                alert('Кэш очищен');
-            }
-        }
-
-        function resetSettings() {
-            if (confirm('Сбросить все настройки?')) {
-                localStorage.removeItem('animanga_settings');
-                alert('Настройки сброшены');
-                location.reload();
-            }
-        }
-
         function clearAllData() {
-            if (confirm('УДАЛИТЬ ВСЕ ДАННЫЕ? Это действие нельзя отменить!')) {
+            if (confirm('⚠️ ВЫ УВЕРЕНЫ? Это удалит все данные!')) {
                 localStorage.clear();
-                alert('Все данные очищены');
+                alert('🧹 Все данные очищены!');
                 location.reload();
             }
         }
 
-        // AniList функции (упрощенные)
+        // AniList функции (базовые)
         function showAniListSearch() {
-            document.getElementById('anilist-modal').style.display = 'flex';
+            alert('🔍 Поиск в AniList будет доступен в следующем обновлении');
         }
 
         function hideAniListSearch() {
             document.getElementById('anilist-modal').style.display = 'none';
-        }
-
-        async function searchAniList() {
-            // Упрощенная версия поиска
-            const query = document.getElementById('anilist-search').value;
-            if (query.length < 2) {
-                document.getElementById('anilist-results').innerHTML = '';
-                return;
-            }
-            
-            document.getElementById('anilist-results').innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">Поиск...</div>';
-            document.getElementById('anilist-results').style.display = 'block';
-            
-            // Здесь должен быть реальный API вызов
-            setTimeout(() => {
-                document.getElementById('anilist-results').innerHTML = `
-                    <div style="padding: 10px; text-align: center; color: #666;">
-                        Для работы поиска нужен API ключ<br>
-                        <small>Функция в разработке</small>
-                    </div>
-                `;
-            }, 1000);
         }
 
         // Инициализация при загрузке
