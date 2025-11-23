@@ -709,6 +709,106 @@
             100% { transform: scale(1); }
         }
 
+        .profile-header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #2a2a2a;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #8774e1;
+            cursor: pointer;
+            border: 3px solid #8774e1;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .achievement-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .achievement-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #8774e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .achievement-locked {
+            background: #2a2a2a;
+            color: #666;
+        }
+
+        .light-theme .achievement-locked {
+            background: #e0e0e0;
+        }
+
+        .theme-option {
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .theme-option.selected {
+            border-color: #8774e1;
+        }
+
+        .recommendation-item {
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #2a2a2a;
+            cursor: pointer;
+        }
+
+        .light-theme .recommendation-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .recommendation-item:active {
+            background: #2a2a2a;
+        }
+
+        .light-theme .recommendation-item:active {
+            background: #e0e0e0;
+        }
+
         @media (max-width: 480px) {
             .container { padding: 10px; padding-bottom: 60px; }
             .header { padding: 14px; border-radius: 14px; }
@@ -718,6 +818,7 @@
             .anime-item, .manga-item { padding: 12px; }
             .cover { width: 45px; height: 60px; }
             .floating-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; }
+            .avatar { width: 70px; height: 70px; }
         }
     </style>
 </head>
@@ -731,8 +832,8 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('anime')">Аниме</button>
             <button class="tab" onclick="switchTab('manga')">Манга</button>
-            <button class="tab" onclick="switchTab('statuses')">Статусы</button>
-            <button class="tab" onclick="switchTab('stats')">Статистика</button>
+            <button class="tab" onclick="switchTab('profile')">Профиль</button>
+            <button class="tab" onclick="switchTab('recommendations')">Рекомендации</button>
             <button class="tab" onclick="switchTab('settings')">Настройки</button>
         </div>
 
@@ -756,27 +857,15 @@
             </div>
         </div>
 
-        <div id="statuses-tab" class="tab-content hidden">
-            <div class="card">
-                <h3 style="margin-bottom: 12px;">🎯 Управление статусами</h3>
-                <p style="color: #888; margin-bottom: 16px;">Создавайте статусы для сортировки</p>
-                <button class="btn" onclick="showAddStatusForm()">
-                    <i class="fas fa-plus"></i> Создать статус
-                </button>
+        <div id="profile-tab" class="tab-content hidden">
+            <div class="profile-header">
+                <div class="avatar" onclick="changeAvatar()" id="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 id="username">Пользователь</h2>
+                <p style="color: #888; margin-top: 4px;" id="user-level">Уровень 1 • 0 XP</p>
             </div>
-            
-            <div class="card">
-                <h4 style="margin-bottom: 12px;">📊 Стандартные статусы</h4>
-                <div id="default-statuses-list"></div>
-            </div>
-            
-            <div class="card">
-                <h4 style="margin-bottom: 12px;">🎨 Пользовательские статусы</h4>
-                <div id="custom-statuses-list"></div>
-            </div>
-        </div>
 
-        <div id="stats-tab" class="tab-content hidden">
             <div class="card">
                 <h3 style="margin-bottom: 16px;">📊 Статистика</h3>
                 <div class="stats-grid">
@@ -811,18 +900,38 @@
                         <div class="stat-value" id="planned-count">0</div>
                         <div class="stat-label">В планах</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="average-rating">0</div>
+                    <div class="stat-value" id="average-rating">0</div>
                         <div class="stat-label">Средний рейтинг</div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="card">
-                <h4 style="margin-bottom: 16px;">📈 Графики</h4>
+                <h4 style="margin-bottom: 16px;">📈 Активность</h4>
                 <div class="chart-container">
-                    <canvas id="stats-chart"></canvas>
+                    <canvas id="activity-chart"></canvas>
                 </div>
+            </div>
+
+            <div class="card">
+                <h4 style="margin-bottom: 16px;">🎮 Достижения</h4>
+                <div id="achievements-list">
+                    <!-- Достижения будут здесь -->
+                </div>
+            </div>
+        </div>
+
+        <div id="recommendations-tab" class="tab-content hidden">
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">🎯 Умные рекомендации</h3>
+                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях</p>
+                <button class="btn" onclick="generateRecommendations()">
+                    <i class="fas fa-sync"></i> Обновить рекомендации
+                </button>
+            </div>
+
+            <div id="recommendations-list">
+                <!-- Рекомендации будут здесь -->
             </div>
         </div>
 
@@ -836,6 +945,18 @@
                         <input type="checkbox" id="theme-toggle" checked>
                         <span class="slider"></span>
                     </label>
+                </div>
+
+                <div style="margin: 16px 0;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">Цветовая тема</div>
+                    <div class="color-picker">
+                        <div class="color-option selected" style="background: #8774e1;" onclick="changeThemeColor('#8774e1')"></div>
+                        <div class="color-option" style="background: #02a9ff;" onclick="changeThemeColor('#02a9ff')"></div>
+                        <div class="color-option" style="background: #4caf50;" onclick="changeThemeColor('#4caf50')"></div>
+                        <div class="color-option" style="background: #ff9800;" onclick="changeThemeColor('#ff9800')"></div>
+                        <div class="color-option" style="background: #e91e63;" onclick="changeThemeColor('#e91e63')"></div>
+                        <div class="color-option" style="background: #9c27b0;" onclick="changeThemeColor('#9c27b0')"></div>
+                    </div>
                 </div>
 
                 <div class="settings-item">
@@ -852,23 +973,6 @@
                         <input type="checkbox" id="backup-toggle" checked>
                         <span class="slider"></span>
                     </label>
-                </div>
-                
-                <div style="margin: 16px 0;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">Язык</div>
-                    <div class="language-switcher">
-                        <div class="lang-btn active" onclick="switchLanguage('ru')">Русский</div>
-                        <div class="lang-btn" onclick="switchLanguage('en')">English</div>
-                    </div>
-                </div>
-
-                <div style="margin: 16px 0;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">Размер текста</div>
-                    <div class="language-switcher">
-                        <div class="lang-btn active" onclick="changeFontSize('small')">Мелкий</div>
-                        <div class="lang-btn" onclick="changeFontSize('medium')">Средний</div>
-                        <div class="lang-btn" onclick="changeFontSize('large')">Крупный</div>
-                    </div>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
@@ -894,7 +998,7 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 2.1.0<br>
+                    Версия 2.2.0<br>
                     <span id="storage-info">Загрузка...</span>
                 </div>
             </div>
@@ -968,26 +1072,19 @@
         </div>
     </div>
 
-    <div id="status-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 16px;" id="status-modal-title">Создать статус</h3>
-            <input type="text" id="status-name" class="form-control" placeholder="Название статуса" required>
-            <input type="color" id="status-color" class="form-control" value="#8774e1">
-            <div style="display: flex; gap: 8px; margin-top: 20px;">
-                <button class="btn" onclick="saveStatus()" style="flex: 2;">Сохранить</button>
-                <button class="btn" onclick="hideStatusModal()" style="flex: 1; background: #666;">Отмена</button>
-            </div>
-        </div>
-    </div>
+    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
 
     <script>
         // Константа версии для принудительного обновления кэша
-        const APP_VERSION = '2.1.1';
+        const APP_VERSION = '2.2.0';
         
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
+        
+        // Получаем ID пользователя для изоляции данных
+        const userId = tg.initDataUnsafe?.user?.id || 'default';
         
         // Проверка версии и сброс кэша при необходимости
         if (localStorage.getItem('app_version') !== APP_VERSION) {
@@ -1004,6 +1101,7 @@
         let mangaList = [];
         let customStatuses = [];
         let currentStatusFilter = 'all';
+        let themeColor = '#8774e1';
 
         // Стандартные статусы
         const defaultStatuses = [
@@ -1011,6 +1109,25 @@
             { id: 'completed', name: 'Завершено', color: '#4caf50' },
             { id: 'planned', name: 'В планах', color: '#ff9800' },
             { id: 'dropped', name: 'Брошено', color: '#f44336' }
+        ];
+
+        // Достижения
+        const achievements = [
+            { id: 'first_anime', name: 'Новичок', description: 'Добавьте первое аниме', icon: '🎬', xp: 10 },
+            { id: 'anime_fan', name: 'Фанат аниме', description: 'Добавьте 10 аниме', icon: '📺', xp: 50 },
+            { id: 'manga_reader', name: 'Читатель', description: 'Добавьте 5 манги', icon: '📚', xp: 30 },
+            { id: 'completionist', name: 'Завершитель', description: 'Завершите 5 тайтлов', icon: '🏆', xp: 100 },
+            { id: 'critic', name: 'Критик', description: 'Оцените 10 тайтлов', icon: '⭐', xp: 40 },
+            { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 100 серий', icon: '🍿', xp: 80 }
+        ];
+
+        // Рекомендации (примерные данные)
+        const sampleRecommendations = [
+            { title: 'Attack on Titan', type: 'anime', reason: 'Похоже на ваши завершённые экшн-тайтлы' },
+            { title: 'One Piece', type: 'manga', reason: 'Популярно среди фанатов длинных серий' },
+            { title: 'Demon Slayer', type: 'anime', reason: 'Высокий рейтинг, подходит под ваши предпочтения' },
+            { title: 'Tokyo Revengers', type: 'anime', reason: 'На основе ваших драматических тайтлов' },
+            { title: 'Chainsaw Man', type: 'manga', reason: 'Новый хит, соответствует вашему стилю' }
         ];
 
         // Инициализация при загрузке
@@ -1022,9 +1139,11 @@
             renderStatusTabs();
             renderLists();
             updateStats();
+            updateAchievements();
+            updateProfile();
             
-            // Инициализация графика
-            initializeChart();
+            // Инициализация графиков
+            initializeCharts();
         });
 
         function setupEventListeners() {
@@ -1032,6 +1151,21 @@
             document.getElementById('theme-toggle').addEventListener('change', function(e) {
                 document.body.classList.toggle('light-theme', !e.target.checked);
                 saveSettings();
+            });
+
+            // Загрузка аватара
+            document.getElementById('avatar-upload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const avatar = document.getElementById('user-avatar');
+                        avatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+                        localStorage.setItem(`avatar_${userId}`, e.target.result);
+                        updateProfile();
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
 
             // Поиск в AniList при нажатии Enter
@@ -1043,34 +1177,41 @@
         }
 
         function loadData() {
-            // Загрузка данных из localStorage
-            animeList = JSON.parse(localStorage.getItem('animeList')) || [];
-            mangaList = JSON.parse(localStorage.getItem('mangaList')) || [];
-            customStatuses = JSON.parse(localStorage.getItem('customStatuses')) || [];
+            // Загрузка данных из localStorage с привязкой к ID пользователя
+            animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
+            mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
+            customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
             
             // Загрузка настроек
-            const settings = JSON.parse(localStorage.getItem('settings')) || {};
+            const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
             document.getElementById('theme-toggle').checked = !settings.lightTheme;
             document.body.classList.toggle('light-theme', settings.lightTheme);
             document.getElementById('notifications-toggle').checked = settings.notifications !== false;
             document.getElementById('backup-toggle').checked = settings.autoBackup !== false;
+            
+            // Загрузка цвета темы
+            themeColor = settings.themeColor || '#8774e1';
+            updateThemeColors();
         }
 
         function saveData() {
-            localStorage.setItem('animeList', JSON.stringify(animeList));
-            localStorage.setItem('mangaList', JSON.stringify(mangaList));
-            localStorage.setItem('customStatuses', JSON.stringify(customStatuses));
+            localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
+            localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
+            localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
             updateStats();
             updateStorageInfo();
+            updateAchievements();
+            updateProfile();
         }
 
         function saveSettings() {
             const settings = {
                 lightTheme: document.body.classList.contains('light-theme'),
                 notifications: document.getElementById('notifications-toggle').checked,
-                autoBackup: document.getElementById('backup-toggle').checked
+                autoBackup: document.getElementById('backup-toggle').checked,
+                themeColor: themeColor
             };
-            localStorage.setItem('settings', JSON.stringify(settings));
+            localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
         }
 
         function switchTab(tabName) {
@@ -1085,9 +1226,11 @@
             
             if (tabName === 'anime' || tabName === 'manga') {
                 renderLists();
-            } else if (tabName === 'stats') {
+            } else if (tabName === 'profile') {
                 updateStats();
-                updateChart();
+                updateCharts();
+            } else if (tabName === 'recommendations') {
+                generateRecommendations();
             }
         }
 
@@ -1185,6 +1328,8 @@
                 }
             } else {
                 list.push(item);
+                // Начисляем опыт за добавление
+                addExperience(5);
             }
             
             saveData();
@@ -1395,6 +1540,10 @@
             if (item) {
                 item.progress = (item.progress || 0) + 1;
                 item.updatedAt = new Date().toISOString();
+                
+                // Начисляем опыт за прогресс
+                addExperience(1);
+                
                 saveData();
                 renderLists();
                 
@@ -1511,89 +1660,185 @@
             document.getElementById('anilist-results').style.display = 'none';
         }
 
-        function showAddStatusForm() {
-            document.getElementById('status-modal-title').textContent = 'Создать статус';
-            document.getElementById('status-name').value = '';
-            document.getElementById('status-color').value = '#8774e1';
-            document.getElementById('status-modal').style.display = 'flex';
+        function changeAvatar() {
+            document.getElementById('avatar-upload').click();
         }
 
-        function hideStatusModal() {
-            document.getElementById('status-modal').style.display = 'none';
-        }
-
-        function saveStatus() {
-            const name = document.getElementById('status-name').value.trim();
-            const color = document.getElementById('status-color').value;
-            
-            if (!name) {
-                alert('Введите название статуса');
-                return;
+        function updateProfile() {
+            const avatar = localStorage.getItem(`avatar_${userId}`);
+            if (avatar) {
+                document.getElementById('user-avatar').innerHTML = `<img src="${avatar}" alt="Avatar">`;
             }
             
-            const status = {
-                id: 'custom_' + Date.now().toString(),
-                name: name,
-                color: color
-            };
+            // Обновляем уровень и опыт
+            const userData = JSON.parse(localStorage.getItem(`userData_${userId}`)) || { xp: 0, level: 1 };
+            document.getElementById('user-level').textContent = `Уровень ${userData.level} • ${userData.xp} XP`;
             
-            customStatuses.push(status);
-            saveData();
-            renderStatusTabs();
-            hideStatusModal();
-            
-            // Обновляем списки статусов в формах
-            renderDefaultStatuses();
-            renderCustomStatuses();
+            // Обновляем имя пользователя из Telegram, если доступно
+            const tgUser = tg.initDataUnsafe?.user;
+            if (tgUser) {
+                document.getElementById('username').textContent = tgUser.first_name || 'Пользователь';
+            }
         }
 
-        function renderDefaultStatuses() {
-            const container = document.getElementById('default-statuses-list');
-            container.innerHTML = '';
+        function addExperience(amount) {
+            const userData = JSON.parse(localStorage.getItem(`userData_${userId}`)) || { xp: 0, level: 1 };
+            userData.xp += amount;
             
-            defaultStatuses.forEach(status => {
-                const item = document.createElement('div');
-                item.className = 'settings-item';
-                item.innerHTML = `
-                    <span>${status.name}</span>
-                    <span class="status-badge" style="background: ${status.color}">${status.name}</span>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function renderCustomStatuses() {
-            const container = document.getElementById('custom-statuses-list');
-            container.innerHTML = '';
-            
-            if (customStatuses.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет пользовательских статусов</div>';
-                return;
+            // Проверяем повышение уровня (каждые 100 XP)
+            const newLevel = Math.floor(userData.xp / 100) + 1;
+            if (newLevel > userData.level) {
+                userData.level = newLevel;
+                showNotification(`🎉 Поздравляем! Вы достигли уровня ${newLevel}!`);
             }
             
-            customStatuses.forEach(status => {
+            localStorage.setItem(`userData_${userId}`, JSON.stringify(userData));
+            updateProfile();
+        }
+
+        function updateAchievements() {
+            const container = document.getElementById('achievements-list');
+            const userData = JSON.parse(localStorage.getItem(`userData_${userId}`)) || { unlockedAchievements: [] };
+            
+            container.innerHTML = '';
+            
+            achievements.forEach(achievement => {
+                const isUnlocked = userData.unlockedAchievements?.includes(achievement.id) || false;
+                
                 const item = document.createElement('div');
-                item.className = 'settings-item';
+                item.className = 'achievement-item';
                 item.innerHTML = `
-                    <span>${status.name}</span>
-                    <div>
-                        <span class="status-badge" style="background: ${status.color}; margin-right: 8px;">${status.name}</span>
-                        <button class="action-btn" onclick="deleteStatus('${status.id}')" style="background: #d32f2f;">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <div class="achievement-icon ${!isUnlocked ? 'achievement-locked' : ''}">
+                        ${isUnlocked ? achievement.icon : '🔒'}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 13px;">${achievement.name}</div>
+                        <div style="font-size: 11px; color: #888; margin-top: 2px;">${achievement.description}</div>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 600; color: #8774e1;">
+                        +${achievement.xp} XP
                     </div>
                 `;
                 container.appendChild(item);
             });
+            
+            // Проверяем и разблокируем достижения
+            checkAchievements();
         }
 
-        function deleteStatus(statusId) {
-            if (!confirm('Удалить статус?')) return;
+        function checkAchievements() {
+            const userData = JSON.parse(localStorage.getItem(`userData_${userId}`)) || { unlockedAchievements: [] };
+            const unlocked = userData.unlockedAchievements || [];
+            let newAchievements = [];
             
-            customStatuses = customStatuses.filter(s => s.id !== statusId);
-            saveData();
-            renderCustomStatuses();
-            renderStatusTabs();
+            // Проверяем каждое достижение
+            if (animeList.length >= 1 && !unlocked.includes('first_anime')) {
+                unlocked.push('first_anime');
+                newAchievements.push('Новичок');
+            }
+            if (animeList.length >= 10 && !unlocked.includes('anime_fan')) {
+                unlocked.push('anime_fan');
+                newAchievements.push('Фанат аниме');
+            }
+            if (mangaList.length >= 5 && !unlocked.includes('manga_reader')) {
+                unlocked.push('manga_reader');
+                newAchievements.push('Читатель');
+            }
+            
+            // Проверяем завершённые тайтлы
+            const completedCount = [...animeList, ...mangaList].filter(item => item.status === 'completed').length;
+            if (completedCount >= 5 && !unlocked.includes('completionist')) {
+                unlocked.push('completionist');
+                newAchievements.push('Завершитель');
+            }
+            
+            // Проверяем оценённые тайтлы
+            const ratedCount = [...animeList, ...mangaList].filter(item => item.rating > 0).length;
+            if (ratedCount >= 10 && !unlocked.includes('critic')) {
+                unlocked.push('critic');
+                newAchievements.push('Критик');
+            }
+            
+            // Проверяем просмотренные серии
+            const totalEpisodes = animeList.reduce((sum, anime) => sum + (anime.progress || 0), 0);
+            if (totalEpisodes >= 100 && !unlocked.includes('binge_watcher')) {
+                unlocked.push('binge_watcher');
+                newAchievements.push('Запоем');
+            }
+            
+            // Сохраняем и показываем уведомления о новых достижениях
+            if (newAchievements.length > 0) {
+                userData.unlockedAchievements = unlocked;
+                localStorage.setItem(`userData_${userId}`, JSON.stringify(userData));
+                
+                // Начисляем XP за достижения
+                newAchievements.forEach(achievementName => {
+                    const achievement = achievements.find(a => a.name === achievementName);
+                    if (achievement) {
+                        addExperience(achievement.xp);
+                    }
+                });
+                
+                showNotification(`🎉 Новые достижения: ${newAchievements.join(', ')}`);
+                updateAchievements();
+            }
+        }
+
+        function generateRecommendations() {
+            const container = document.getElementById('recommendations-list');
+            container.innerHTML = '';
+            
+            if (animeList.length === 0 && mangaList.length === 0) {
+                container.innerHTML = '<div class="card" style="text-align: center; color: #888; padding: 40px;">Добавьте несколько тайтлов для получения рекомендаций</div>';
+                return;
+            }
+            
+            // Простая логика рекомендаций на основе жанров и популярности
+            sampleRecommendations.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                item.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 4px;">${rec.title}</div>
+                    <div style="font-size: 11px; color: #888; margin-bottom: 6px;">${rec.type === 'anime' ? 'Аниме' : 'Манга'}</div>
+                    <div style="font-size: 12px; color: #8774e1;">${rec.reason}</div>
+                `;
+                item.onclick = () => {
+                    document.getElementById('item-title').value = rec.title;
+                    currentType = rec.type;
+                    showAddForm(rec.type);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        function changeThemeColor(color) {
+            themeColor = color;
+            updateThemeColors();
+            saveSettings();
+            
+            // Обновляем выбранный цвет в пикере
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function updateThemeColors() {
+            document.documentElement.style.setProperty('--theme-color', themeColor);
+            
+            // Обновляем все элементы с основным цветом
+            const elements = document.querySelectorAll('.tab.active, .btn, .progress-fill, .status-tab.active, .floating-btn, .achievement-icon:not(.achievement-locked)');
+            elements.forEach(el => {
+                el.style.backgroundColor = themeColor;
+                el.style.borderColor = themeColor;
+            });
+            
+            // Обновляем цвет статус-баджей
+            document.querySelectorAll('.status-badge').forEach(badge => {
+                if (badge.style.backgroundColor === 'rgb(135, 116, 225)') { // #8774e1
+                    badge.style.backgroundColor = themeColor;
+                }
+            });
         }
 
         function updateStats() {
@@ -1625,16 +1870,18 @@
             document.getElementById('average-rating').textContent = averageRating;
         }
 
-        function initializeChart() {
-            const ctx = document.getElementById('stats-chart').getContext('2d');
-            window.statsChart = new Chart(ctx, {
-                type: 'doughnut',
+        function initializeCharts() {
+            const ctx = document.getElementById('activity-chart').getContext('2d');
+            window.activityChart = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: ['Аниме', 'Манга'],
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
                     datasets: [{
-                        data: [animeList.length, mangaList.length],
-                        backgroundColor: ['#8774e1', '#02a9ff'],
-                        borderWidth: 0
+                        label: 'Активность',
+                        data: [5, 8, 12, 6, 15, 20, 10],
+                        backgroundColor: themeColor,
+                        borderWidth: 0,
+                        borderRadius: 4
                     }]
                 },
                 options: {
@@ -1642,10 +1889,25 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: document.body.classList.contains('light-theme') ? '#333' : '#fff',
-                                font: { size: 12 }
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: document.body.classList.contains('light-theme') ? '#f0f0f0' : '#2a2a2a'
+                            },
+                            ticks: {
+                                color: document.body.classList.contains('light-theme') ? '#333' : '#fff'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: document.body.classList.contains('light-theme') ? '#333' : '#fff'
                             }
                         }
                     }
@@ -1653,10 +1915,13 @@
             });
         }
 
-        function updateChart() {
-            if (window.statsChart) {
-                window.statsChart.data.datasets[0].data = [animeList.length, mangaList.length];
-                window.statsChart.update();
+        function updateCharts() {
+            if (window.activityChart) {
+                // Обновляем данные графика активности (примерные данные)
+                const newData = [2, 5, 8, 12, 6, 15, 8];
+                window.activityChart.data.datasets[0].data = newData;
+                window.activityChart.data.datasets[0].backgroundColor = themeColor;
+                window.activityChart.update();
             }
         }
 
@@ -1671,28 +1936,12 @@
             alert(message);
         }
 
-        function switchLanguage(lang) {
-            // Простое переключение языка
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Здесь можно добавить логику перевода
-            console.log('Switching to language:', lang);
-        }
-
-        function changeFontSize(size) {
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const sizes = { small: '14px', medium: '16px', large: '18px' };
-            document.body.style.fontSize = sizes[size];
-        }
-
         function exportData() {
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
                 customStatuses: customStatuses,
+                userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
                 exportDate: new Date().toISOString()
             };
             
@@ -1726,10 +1975,17 @@
                             animeList = data.animeList || [];
                             mangaList = data.mangaList || [];
                             customStatuses = data.customStatuses || [];
+                            
+                            if (data.userData) {
+                                localStorage.setItem(`userData_${userId}`, JSON.stringify(data.userData));
+                            }
+                            
                             saveData();
                             renderLists();
                             renderStatusTabs();
                             updateStats();
+                            updateAchievements();
+                            updateProfile();
                             showNotification('Данные импортированы!');
                         }
                     } catch (error) {
@@ -1744,9 +2000,17 @@
         function clearCache() {
             if (confirm('Очистить кэш? Это не удалит ваши данные.')) {
                 // Очищаем только временные данные
-                const settings = JSON.parse(localStorage.getItem('settings')) || {};
+                const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
+                const avatar = localStorage.getItem(`avatar_${userId}`);
+                const userData = localStorage.getItem(`userData_${userId}`);
+                
+                // Сохраняем только важные данные
                 localStorage.clear();
-                localStorage.setItem('settings', JSON.stringify(settings));
+                
+                if (settings) localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
+                if (avatar) localStorage.setItem(`avatar_${userId}`, avatar);
+                if (userData) localStorage.setItem(`userData_${userId}`, userData);
+                
                 localStorage.setItem('app_version', APP_VERSION);
                 loadData();
                 showNotification('Кэш очищен!');
@@ -1759,6 +2023,8 @@
                 document.body.classList.remove('light-theme');
                 document.getElementById('notifications-toggle').checked = true;
                 document.getElementById('backup-toggle').checked = true;
+                themeColor = '#8774e1';
+                updateThemeColors();
                 saveSettings();
                 showNotification('Настройки сброшены!');
             }
@@ -1766,21 +2032,32 @@
 
         function clearAllData() {
             if (confirm('ВНИМАНИЕ! Это удалит ВСЕ ваши данные. Продолжить?')) {
-                localStorage.clear();
-                localStorage.setItem('app_version', APP_VERSION);
+                // Удаляем только данные текущего пользователя
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.includes(userId) || key === 'app_version') {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
                 loadData();
                 renderLists();
                 renderStatusTabs();
                 updateStats();
+                updateAchievements();
+                updateProfile();
                 showNotification('Все данные очищены!');
             }
         }
 
         // Инициализация при загрузке
         setTimeout(() => {
-            renderDefaultStatuses();
-            renderCustomStatuses();
+            updateThemeColors();
+            generateRecommendations();
         }, 100);
     </script>
 </body>
-</html>
+                </html>
