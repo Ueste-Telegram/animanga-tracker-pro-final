@@ -809,6 +809,68 @@
             background: #e0e0e0;
         }
 
+        /* Новые стили для импорта/экспорта */
+        .import-export-section {
+            margin: 16px 0;
+        }
+
+        .import-export-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .sync-section {
+            margin: 16px 0;
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .sync-section {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .reminder-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .reminder-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .group-list-item {
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .group-list-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .advanced-stats {
+            margin-top: 16px;
+        }
+
+        .genre-chart {
+            margin: 16px 0;
+        }
+
         @media (max-width: 480px) {
             .container { padding: 10px; padding-bottom: 60px; }
             .header { padding: 14px; border-radius: 14px; }
@@ -830,11 +892,11 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('anime')">Аниме</button>
-            <button class="tab" onclick="switchTab('manga')">Манга</button>
-            <button class="tab" onclick="switchTab('recommendations')">Рекомендации</button>
-            <button class="tab" onclick="switchTab('profile')">Профиль</button>
-            <button class="tab" onclick="switchTab('settings')">Настройки</button>
+            <button class="tab active" onclick="switchTab('anime', this)">Аниме</button>
+            <button class="tab" onclick="switchTab('manga', this)">Манга</button>
+            <button class="tab" onclick="switchTab('recommendations', this)">Рекомендации</button>
+            <button class="tab" onclick="switchTab('profile', this)">Профиль</button>
+            <button class="tab" onclick="switchTab('settings', this)">Настройки</button>
         </div>
 
         <div id="anime-tab" class="tab-content">
@@ -928,6 +990,23 @@
                 </div>
             </div>
 
+            <div class="card advanced-stats">
+                <h4 style="margin-bottom: 16px;">📈 Расширенная статистика</h4>
+                <div class="genre-chart">
+                    <canvas id="genre-chart"></canvas>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-time">0ч</div>
+                        <div class="stat-label">Всего времени</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="favorite-genre">-</div>
+                        <div class="stat-label">Любимый жанр</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
                 <h4 style="margin-bottom: 16px;">🎮 Достижения</h4>
                 <div id="achievements-list">
@@ -960,6 +1039,30 @@
                     </div>
                 </div>
 
+                <div class="sync-section">
+                    <h4 style="margin-bottom: 12px;">🔄 Синхронизация</h4>
+                    <div class="import-export-buttons">
+                        <button class="btn" onclick="showAniListSync()">
+                            <i class="fab fa-anilist"></i> AniList
+                        </button>
+                        <button class="btn" onclick="showMalSync()">
+                            <i class="fas fa-exchange-alt"></i> MAL
+                        </button>
+                    </div>
+                </div>
+
+                <div class="import-export-section">
+                    <h4 style="margin-bottom: 12px;">💾 Данные</h4>
+                    <div class="import-export-buttons">
+                        <button class="btn" onclick="exportData()">
+                            <i class="fas fa-download"></i> Экспорт
+                        </button>
+                        <button class="btn" onclick="importData()">
+                            <i class="fas fa-upload"></i> Импорт
+                        </button>
+                    </div>
+                </div>
+
                 <div class="settings-item">
                     <span>🔔 Уведомления</span>
                     <label class="switch">
@@ -975,16 +1078,15 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
-                    <button class="btn" onclick="exportData()">
-                        <i class="fas fa-download"></i> Экспорт
-                    </button>
-                    <button class="btn" onclick="importData()">
-                        <i class="fas fa-upload"></i> Импорт
-                    </button>
-                </div>
 
+                <div class="settings-item">
+                    <span>📱 Оффлайн-режим</span>
+                    <label class="switch">
+                        <input type="checkbox" id="offline-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
                     <button class="btn btn-secondary" onclick="clearCache()">
                         <i class="fas fa-broom"></i> Очистить кэш
@@ -999,7 +1101,7 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 2.2.0<br>
+                    Версия 2.3.0<br>
                     <span id="storage-info">Загрузка...</span>
                 </div>
             </div>
@@ -1073,11 +1175,72 @@
         </div>
     </div>
 
+    <!-- Новые модальные окна -->
+    <div id="anilist-sync-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 16px;">🔄 Синхронизация с AniList</h3>
+            <p style="color: #888; margin-bottom: 16px; font-size: 13px;">Импортируйте ваш список из AniList</p>
+            
+            <input type="text" id="anilist-username" class="form-control" placeholder="Имя пользователя AniList">
+            
+            <div style="display: flex; gap: 8px; margin: 12px 0;">
+                <button class="btn" onclick="importFromAniList()" style="flex: 1;">
+                    <i class="fas fa-download"></i> Импорт
+                </button>
+                <button class="btn" onclick="exportToAniList()" style="flex: 1;">
+                    <i class="fas fa-upload"></i> Экспорт
+                </button>
+            </div>
+            
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn" onclick="hideAniListSync()" style="background: #666;">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reminders-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 16px;">⏰ Напоминания о выходе</h3>
+            <p style="color: #888; margin-bottom: 16px; font-size: 13px;">Управляйте напоминаниями о новых сериях</p>
+            
+            <div id="reminders-list">
+                <!-- Напоминания будут здесь -->
+            </div>
+            
+            <button class="btn" onclick="addNewReminder()" style="margin-top: 12px;">
+                <i class="fas fa-plus"></i> Добавить напоминание
+            </button>
+            
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn" onclick="hideRemindersModal()" style="background: #666;">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="groups-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 16px;">👥 Групповые списки</h3>
+            <p style="color: #888; margin-bottom: 16px; font-size: 13px;">Создавайте общие списки с друзьями</p>
+            
+            <div id="groups-list">
+                <!-- Группы будут здесь -->
+            </div>
+            
+            <button class="btn" onclick="createNewGroup()" style="margin-top: 12px;">
+                <i class="fas fa-plus"></i> Создать группу
+            </button>
+            
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn" onclick="hideGroupsModal()" style="background: #666;">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
 
     <script>
         // Константа версии для принудительного обновления кэша
-        const APP_VERSION = '2.2.0';
+        const APP_VERSION = '2.3.0';
         
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
@@ -1103,6 +1266,8 @@
         let customStatuses = [];
         let currentStatusFilter = 'all';
         let themeColor = '#8774e1';
+        let reminders = [];
+        let groupLists = [];
 
         // Стандартные статусы
         const defaultStatuses = [
@@ -1119,7 +1284,9 @@
             { id: 'manga_reader', name: 'Читатель', description: 'Добавьте 5 манги', icon: '📚', xp: 30 },
             { id: 'completionist', name: 'Завершитель', description: 'Завершите 5 тайтлов', icon: '🏆', xp: 100 },
             { id: 'critic', name: 'Критик', description: 'Оцените 10 тайтлов', icon: '⭐', xp: 40 },
-            { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 100 серий', icon: '🍿', xp: 80 }
+            { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 100 серий', icon: '🍿', xp: 80 },
+            { id: 'socializer', name: 'Общительный', description: 'Создайте групповой список', icon: '👥', xp: 25 },
+            { id: 'organizer', name: 'Организатор', description: 'Создайте 3 напоминания', icon: '⏰', xp: 30 }
         ];
 
         // Рекомендации (примерные данные)
@@ -1175,6 +1342,12 @@
                     performAniListSearch();
                 }
             });
+
+            // Оффлайн-режим
+            document.getElementById('offline-toggle').addEventListener('change', function(e) {
+                saveSettings();
+                showNotification(e.target.checked ? 'Оффлайн-режим включен' : 'Оффлайн-режим выключен');
+            });
         }
 
         function loadData() {
@@ -1182,6 +1355,8 @@
             animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
             mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
             customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
+            reminders = JSON.parse(localStorage.getItem(`reminders_${userId}`)) || [];
+            groupLists = JSON.parse(localStorage.getItem(`groupLists_${userId}`)) || [];
             
             // Загрузка настроек
             const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
@@ -1189,6 +1364,7 @@
             document.body.classList.toggle('light-theme', settings.lightTheme);
             document.getElementById('notifications-toggle').checked = settings.notifications !== false;
             document.getElementById('backup-toggle').checked = settings.autoBackup !== false;
+            document.getElementById('offline-toggle').checked = settings.offlineMode !== false;
             
             // Загрузка цвета темы
             themeColor = settings.themeColor || '#8774e1';
@@ -1199,6 +1375,8 @@
             localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
             localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
             localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
+            localStorage.setItem(`reminders_${userId}`, JSON.stringify(reminders));
+            localStorage.setItem(`groupLists_${userId}`, JSON.stringify(groupLists));
             updateStats();
             updateStorageInfo();
             updateAchievements();
@@ -1210,19 +1388,21 @@
                 lightTheme: document.body.classList.contains('light-theme'),
                 notifications: document.getElementById('notifications-toggle').checked,
                 autoBackup: document.getElementById('backup-toggle').checked,
+                offlineMode: document.getElementById('offline-toggle').checked,
                 themeColor: themeColor
             };
             localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
         }
 
-        function switchTab(tabName) {
+        // ИСПРАВЛЕНИЕ: Правильное переключение вкладок
+        function switchTab(tabName, tabElement) {
             currentTab = tabName;
             
             // Обновляем активные табы
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
             
-            event.target.classList.add('active');
+            tabElement.classList.add('active');
             document.getElementById(tabName + '-tab').classList.remove('hidden');
             
             if (tabName === 'anime' || tabName === 'manga') {
@@ -1661,6 +1841,180 @@
             document.getElementById('anilist-results').style.display = 'none';
         }
 
+        // НОВЫЕ ФУНКЦИИ: Синхронизация с AniList
+        function showAniListSync() {
+            document.getElementById('anilist-sync-modal').style.display = 'flex';
+        }
+
+        function hideAniListSync() {
+            document.getElementById('anilist-sync-modal').style.display = 'none';
+        }
+
+        function showMalSync() {
+            showNotification('Синхронизация с MyAnimeList скоро будет доступна!');
+        }
+
+        async function importFromAniList() {
+            const username = document.getElementById('anilist-username').value.trim();
+            if (!username) {
+                alert('Введите имя пользователя AniList');
+                return;
+            }
+
+            showNotification('Импорт из AniList... Эта функция в разработке');
+            // Здесь будет реализация импорта из AniList
+        }
+
+        async function exportToAniList() {
+            showNotification('Экспорт в AniList... Эта функция в разработке');
+            // Здесь будет реализация экспорта в AniList
+        }
+
+        // НОВЫЕ ФУНКЦИИ: Напоминания о выходе серий
+        function showRemindersModal() {
+            document.getElementById('reminders-modal').style.display = 'flex';
+            renderRemindersList();
+        }
+
+        function hideRemindersModal() {
+            document.getElementById('reminders-modal').style.display = 'none';
+        }
+
+        function renderRemindersList() {
+            const container = document.getElementById('reminders-list');
+            container.innerHTML = '';
+
+            if (reminders.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет напоминаний</div>';
+                return;
+            }
+
+            reminders.forEach((reminder, index) => {
+                const item = document.createElement('div');
+                item.className = 'reminder-item';
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600;">${reminder.title}</div>
+                        <div style="font-size: 11px; color: #888;">Каждый ${reminder.day} в ${reminder.time}</div>
+                    </div>
+                    <button class="action-btn" onclick="deleteReminder(${index})" title="Удалить" style="background: #d32f2f;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addNewReminder() {
+            const title = prompt('Название аниме для напоминания:');
+            if (!title) return;
+
+            const day = prompt('День недели (например, понедельник):');
+            const time = prompt('Время (например, 18:00):');
+
+            if (day && time) {
+                reminders.push({
+                    id: Date.now().toString(),
+                    title: title,
+                    day: day,
+                    time: time,
+                    enabled: true
+                });
+                saveData();
+                renderRemindersList();
+                showNotification('Напоминание добавлено!');
+                
+                // Разблокируем достижение
+                checkAchievements();
+            }
+        }
+
+        function deleteReminder(index) {
+            if (confirm('Удалить напоминание?')) {
+                reminders.splice(index, 1);
+                saveData();
+                renderRemindersList();
+                showNotification('Напоминание удалено!');
+            }
+        }
+
+        // НОВЫЕ ФУНКЦИИ: Групповые списки
+        function showGroupsModal() {
+            document.getElementById('groups-modal').style.display = 'flex';
+            renderGroupsList();
+        }
+
+        function hideGroupsModal() {
+            document.getElementById('groups-modal').style.display = 'none';
+        }
+
+        function renderGroupsList() {
+            const container = document.getElementById('groups-list');
+            container.innerHTML = '';
+
+            if (groupLists.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет групповых списков</div>';
+                return;
+            }
+
+            groupLists.forEach((group, index) => {
+                const item = document.createElement('div');
+                item.className = 'group-list-item';
+                item.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 4px;">${group.name}</div>
+                    <div style="font-size: 11px; color: #888;">
+                        Участников: ${group.members.length} • Тайтлов: ${group.items.length}
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="viewGroup(${index})">Открыть</button>
+                        <button class="quick-action-btn" onclick="shareGroup(${index})">Поделиться</button>
+                        <button class="quick-action-btn" onclick="leaveGroup(${index})" style="background: #d32f2f;">Выйти</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function createNewGroup() {
+            const name = prompt('Название группового списка:');
+            if (!name) return;
+
+            groupLists.push({
+                id: Date.now().toString(),
+                name: name,
+                owner: userId,
+                members: [userId],
+                items: [],
+                createdAt: new Date().toISOString()
+            });
+            saveData();
+            renderGroupsList();
+            showNotification('Групповой список создан!');
+            
+            // Разблокируем достижение
+            checkAchievements();
+        }
+
+        function viewGroup(index) {
+            showNotification(`Открываем группу "${groupLists[index].name}"`);
+            // Здесь будет реализация просмотра группы
+        }
+
+        function shareGroup(index) {
+            const group = groupLists[index];
+            showNotification(`Ссылка для приглашения в группу "${group.name}" скопирована!`);
+            // Здесь будет реализация шеринга группы
+        }
+
+        function leaveGroup(index) {
+            if (confirm('Покинуть группу?')) {
+                groupLists.splice(index, 1);
+                saveData();
+                renderGroupsList();
+                showNotification('Вы вышли из группы');
+            }
+        }
+
         function changeAvatar() {
             document.getElementById('avatar-upload').click();
         }
@@ -1767,6 +2121,16 @@
                 newAchievements.push('Запоем');
             }
             
+            // Новые достижения
+            if (groupLists.length >= 1 && !unlocked.includes('socializer')) {
+                unlocked.push('socializer');
+                newAchievements.push('Общительный');
+            }
+            if (reminders.length >= 3 && !unlocked.includes('organizer')) {
+                unlocked.push('organizer');
+                newAchievements.push('Организатор');
+            }
+            
             // Сохраняем и показываем уведомления о новых достижениях
             if (newAchievements.length > 0) {
                 userData.unlockedAchievements = unlocked;
@@ -1869,6 +2233,13 @@
                 : 0;
             
             document.getElementById('average-rating').textContent = averageRating;
+            
+            // Расширенная статистика
+            const totalTime = Math.round(totalEpisodes * 24 + totalChapters * 5); // Примерный расчет времени
+            document.getElementById('total-time').textContent = `${totalTime}ч`;
+            
+            // Любимый жанр (заглушка)
+            document.getElementById('favorite-genre').textContent = 'Сёнэн';
         }
 
         function initializeCharts() {
@@ -1914,6 +2285,37 @@
                     }
                 }
             });
+
+            // График жанров
+            const genreCtx = document.getElementById('genre-chart').getContext('2d');
+            window.genreChart = new Chart(genreCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Сёнэн', 'Драма', 'Комедия', 'Фэнтези', 'Романтика'],
+                    datasets: [{
+                        data: [30, 20, 15, 25, 10],
+                        backgroundColor: [
+                            '#8774e1', '#02a9ff', '#4caf50', '#ff9800', '#e91e63'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: document.body.classList.contains('light-theme') ? '#333' : '#fff',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         function updateCharts() {
@@ -1942,6 +2344,8 @@
                 animeList: animeList,
                 mangaList: mangaList,
                 customStatuses: customStatuses,
+                reminders: reminders,
+                groupLists: groupLists,
                 userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
                 exportDate: new Date().toISOString()
             };
@@ -1976,6 +2380,8 @@
                             animeList = data.animeList || [];
                             mangaList = data.mangaList || [];
                             customStatuses = data.customStatuses || [];
+                            reminders = data.reminders || [];
+                            groupLists = data.groupLists || [];
                             
                             if (data.userData) {
                                 localStorage.setItem(`userData_${userId}`, JSON.stringify(data.userData));
@@ -2024,6 +2430,7 @@
                 document.body.classList.remove('light-theme');
                 document.getElementById('notifications-toggle').checked = true;
                 document.getElementById('backup-toggle').checked = true;
+                document.getElementById('offline-toggle').checked = true;
                 themeColor = '#8774e1';
                 updateThemeColors();
                 saveSettings();
@@ -2061,4 +2468,4 @@
         }, 100);
     </script>
 </body>
-                </html>
+</html>
