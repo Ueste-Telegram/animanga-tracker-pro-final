@@ -832,8 +832,8 @@
         <div class="tabs">
             <button class="tab active" onclick="switchTab('anime')">Аниме</button>
             <button class="tab" onclick="switchTab('manga')">Манга</button>
-            <button class="tab" onclick="switchTab('profile')">Профиль</button>
             <button class="tab" onclick="switchTab('recommendations')">Рекомендации</button>
+            <button class="tab" onclick="switchTab('profile')">Профиль</button>
             <button class="tab" onclick="switchTab('settings')">Настройки</button>
         </div>
 
@@ -854,6 +854,20 @@
             <div class="status-tabs" id="manga-status-tabs"></div>
             <div id="manga-list" class="virtual-list-container">
                 <!-- Манга будет здесь -->
+            </div>
+        </div>
+
+        <div id="recommendations-tab" class="tab-content hidden">
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">🎯 Умные рекомендации</h3>
+                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях</p>
+                <button class="btn" onclick="generateRecommendations()">
+                    <i class="fas fa-sync"></i> Обновить рекомендации
+                </button>
+            </div>
+
+            <div id="recommendations-list">
+                <!-- Рекомендации будут здесь -->
             </div>
         </div>
 
@@ -900,7 +914,8 @@
                         <div class="stat-value" id="planned-count">0</div>
                         <div class="stat-label">В планах</div>
                     </div>
-                    <div class="stat-value" id="average-rating">0</div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="average-rating">0</div>
                         <div class="stat-label">Средний рейтинг</div>
                     </div>
                 </div>
@@ -918,20 +933,6 @@
                 <div id="achievements-list">
                     <!-- Достижения будут здесь -->
                 </div>
-            </div>
-        </div>
-
-        <div id="recommendations-tab" class="tab-content hidden">
-            <div class="card">
-                <h3 style="margin-bottom: 12px;">🎯 Умные рекомендации</h3>
-                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях</p>
-                <button class="btn" onclick="generateRecommendations()">
-                    <i class="fas fa-sync"></i> Обновить рекомендации
-                </button>
-            </div>
-
-            <div id="recommendations-list">
-                <!-- Рекомендации будут здесь -->
             </div>
         </div>
 
