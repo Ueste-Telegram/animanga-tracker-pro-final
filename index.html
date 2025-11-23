@@ -711,6 +711,23 @@
         </div>
     </div>
 
+    <!-- Добавляем обратно модальное окно AniList -->
+    <div id="anilist-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 16px;">🔍 Поиск в AniList</h3>
+            
+            <div class="form-group">
+                <input type="text" id="anilist-search" class="form-control" placeholder="Введите название аниме или манги..." oninput="searchAniList()">
+            </div>
+            
+            <div id="anilist-results" class="search-results"></div>
+            
+            <button class="btn" onclick="hideAniListSearch()" style="background: #666; margin-top: 16px;">
+                Назад
+            </button>
+        </div>
+    </div>
+
     <div id="status-modal" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 16px;" id="status-modal-title">Создать статус</h3>
@@ -738,7 +755,7 @@
 
     <script>
         // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-        console.log('🚀 AniManga Tracker PRO - Fixed Version');
+        console.log('🚀 AniManga Tracker PRO - Final Version');
         
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -1449,13 +1466,39 @@
             }
         }
 
-        // AniList функции (базовые)
+        // AniList функции
         function showAniListSearch() {
-            alert('🔍 Поиск в AniList будет доступен в следующем обновлении');
+            document.getElementById('anilist-modal').style.display = 'flex';
         }
 
         function hideAniListSearch() {
             document.getElementById('anilist-modal').style.display = 'none';
+        }
+
+        async function searchAniList() {
+            const query = document.getElementById('anilist-search').value.trim();
+            if (query.length < 3) {
+                document.getElementById('anilist-results').innerHTML = '';
+                document.getElementById('anilist-results').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('anilist-results').innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Поиск...</div>';
+            document.getElementById('anilist-results').style.display = 'block';
+            
+            try {
+                // Заглушка для поиска - в реальности здесь будет API запрос
+                setTimeout(() => {
+                    document.getElementById('anilist-results').innerHTML = `
+                        <div style="padding: 12px; text-align: center; color: #888;">
+                            🔍 Функция поиска в разработке<br>
+                            <small>Скоро будет доступно!</small>
+                        </div>
+                    `;
+                }, 1000);
+            } catch (error) {
+                document.getElementById('anilist-results').innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Ошибка поиска</div>';
+            }
         }
 
         // Инициализация при загрузке
