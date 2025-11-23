@@ -103,6 +103,12 @@
             transform: scale(0.98);
         }
 
+        .btn-small {
+            padding: 12px 18px;
+            font-size: 14px;
+            width: auto;
+        }
+
         .card {
             background: #f8f9fa;
             border-radius: 16px;
@@ -316,59 +322,6 @@
             transform: scale(0.95);
         }
 
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background: #8774e1;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -418,6 +371,40 @@
         .quick-action-btn:active {
             background: #8774e1;
             color: white;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .status-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .color-option.selected {
+            border-color: #333;
         }
 
         @media (max-width: 480px) {
@@ -473,6 +460,7 @@
         <div class="tabs">
             <button class="tab active" data-tab="anime">Аниме</button>
             <button class="tab" data-tab="manga">Манга</button>
+            <button class="tab" data-tab="statuses">Статусы</button>
             <button class="tab" data-tab="stats">Статистика</button>
             <button class="tab" data-tab="settings">Настройки</button>
         </div>
@@ -481,6 +469,7 @@
             <button class="btn" onclick="showAddForm('anime')">
                 <i class="fas fa-plus"></i> Добавить аниме
             </button>
+            <div class="status-tabs" id="anime-status-tabs"></div>
             <div id="anime-list" class="anime-list">
                 <div class="card" style="text-align: center; color: #666;">
                     <i class="fas fa-tv" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
@@ -496,6 +485,7 @@
             <button class="btn" onclick="showAddForm('manga')">
                 <i class="fas fa-plus"></i> Добавить мангу
             </button>
+            <div class="status-tabs" id="manga-status-tabs"></div>
             <div id="manga-list" class="manga-list">
                 <div class="card" style="text-align: center; color: #666;">
                     <i class="fas fa-book" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
@@ -504,6 +494,26 @@
                         <i class="fas fa-plus"></i> Добавить первую мангу
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div id="statuses-tab" class="tab-content hidden">
+            <div class="card">
+                <h3 style="margin-bottom: 15px;">🎯 Управление статусами</h3>
+                <p style="color: #666; margin-bottom: 20px;">Создавайте собственные статусы для удобной сортировки</p>
+                <button class="btn btn-small" onclick="showAddStatusForm()">
+                    <i class="fas fa-plus"></i> Создать статус
+                </button>
+            </div>
+            
+            <div class="card">
+                <h4 style="margin-bottom: 15px;">📊 Стандартные статусы</h4>
+                <div id="default-statuses-list"></div>
+            </div>
+            
+            <div class="card">
+                <h4 style="margin-bottom: 15px;">🎨 Пользовательские статусы</h4>
+                <div id="custom-statuses-list"></div>
             </div>
         </div>
 
@@ -547,9 +557,26 @@
         </div>
     </div>
 
-    <button class="floating-btn" onclick="showAddForm('anime')">
+    <button class="floating-btn" onclick="showQuickAddMenu()">
         <i class="fas fa-plus"></i>
     </button>
+
+    <div id="quick-add-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;">Быстрое добавление</h3>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" onclick="showAddForm('anime'); hideQuickAddMenu();" style="flex: 1;">
+                    <i class="fas fa-tv"></i> Аниме
+                </button>
+                <button class="btn" onclick="showAddForm('manga'); hideQuickAddMenu();" style="flex: 1;">
+                    <i class="fas fa-book"></i> Манга
+                </button>
+            </div>
+            <button class="btn" onclick="hideQuickAddMenu()" style="background: #666; margin-top: 10px;">
+                Отмена
+            </button>
+        </div>
+    </div>
 
     <div id="item-modal" class="modal">
         <div class="modal-content">
@@ -571,7 +598,12 @@
             </div>
 
             <div class="form-group">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Рейтинг</label>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Статус</label>
+                <select id="item-status" class="form-control"></select>
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; text-align: center;">Рейтинг</label>
                 <div class="stars" id="rating-stars">
                     <span class="star" data-rating="1">★</span>
                     <span class="star" data-rating="2">★</span>
@@ -588,11 +620,40 @@
         </div>
     </div>
 
+    <div id="status-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 20px;" id="status-modal-title">Создать статус</h3>
+            
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Название статуса</label>
+                <input type="text" id="status-name" class="form-control" placeholder="Например: Любимое">
+            </div>
+
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Цвет статуса</label>
+                <div class="color-picker">
+                    <div class="color-option selected" style="background: #8774e1;" data-color="#8774e1"></div>
+                    <div class="color-option" style="background: #4caf50;" data-color="#4caf50"></div>
+                    <div class="color-option" style="background: #ff9800;" data-color="#ff9800"></div>
+                    <div class="color-option" style="background: #f44336;" data-color="#f44336"></div>
+                    <div class="color-option" style="background: #2196f3;" data-color="#2196f3"></div>
+                    <div class="color-option" style="background: #9c27b0;" data-color="#9c27b0"></div>
+                </div>
+                <input type="text" id="status-color" class="form-control" style="margin-top: 10px;" placeholder="Или введите HEX код цвета">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn" onclick="saveStatus()" style="flex: 2;">Сохранить</button>
+                <button class="btn" onclick="hideStatusModal()" style="flex: 1; background: #666;">Отмена</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="import-file" accept=".json" style="display: none;">
 
     <script>
-        // 🚀 ПРОСТОЙ И РАБОЧИЙ КОД
-        console.log('🚀 AniManga Tracker PRO - Simple & Working');
+        // 🚀 ИНИЦИАЛИЗАЦИЯ
+        console.log('🚀 AniManga Tracker PRO - With Status System');
         
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -603,12 +664,31 @@
         let currentType = 'anime';
         let currentData = [];
         let currentRating = 0;
+        let selectedStatus = 'all';
+        let selectedColor = '#8774e1';
+        let editingStatus = null;
+
+        const defaultStatuses = [
+            { id: 'watching', name: 'Смотрю', color: '#8774e1', isDefault: true },
+            { id: 'planned', name: 'В планах', color: '#ff9800', isDefault: true },
+            { id: 'completed', name: 'Просмотрено', color: '#4caf50', isDefault: true },
+            { id: 'dropped', name: 'Брошено', color: '#f44336', isDefault: true }
+        ];
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadData();
+            initApp();
             setupEventListeners();
-            console.log('✅ App loaded successfully');
+            console.log('✅ App loaded with status system');
         });
+
+        function initApp() {
+            loadData();
+            renderLists();
+            updateStats();
+            renderStatusTabs();
+            renderStatusesList();
+            switchTab('anime');
+        }
 
         function setupEventListeners() {
             document.querySelectorAll('.tab').forEach(tab => {
@@ -621,6 +701,21 @@
                 star.addEventListener('click', function() {
                     setRating(parseInt(this.getAttribute('data-rating')));
                 });
+            });
+
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    selectedColor = this.getAttribute('data-color');
+                    document.getElementById('status-color').value = selectedColor;
+                });
+            });
+
+            document.getElementById('status-color').addEventListener('input', function() {
+                selectedColor = this.value;
             });
 
             document.getElementById('import-file').addEventListener('change', function(e) {
@@ -656,6 +751,253 @@
 
             if (tabName === 'stats') {
                 updateStats();
+            } else if (tabName === 'statuses') {
+                renderStatusesList();
+            }
+        }
+
+        // 📊 СИСТЕМА СТАТУСОВ
+        function renderStatusTabs() {
+            renderAnimeStatusTabs();
+            renderMangaStatusTabs();
+        }
+
+        function renderAnimeStatusTabs() {
+            const statusTabs = document.getElementById('anime-status-tabs');
+            if (!statusTabs) return;
+            
+            statusTabs.innerHTML = '';
+            
+            const allTab = document.createElement('div');
+            allTab.className = `status-tab ${selectedStatus === 'all' ? 'active' : ''}`;
+            allTab.textContent = `Все (${currentData.filter(item => item.type === 'anime').length})`;
+            allTab.onclick = () => switchStatusTab('all', 'anime');
+            statusTabs.appendChild(allTab);
+
+            const userData = getUserData();
+            userData.statuses.forEach(status => {
+                const count = currentData.filter(item => item.type === 'anime' && item.status === status.id).length;
+                const tab = document.createElement('div');
+                tab.className = `status-tab ${selectedStatus === status.id ? 'active' : ''}`;
+                tab.innerHTML = `${status.name} (${count})`;
+                tab.style.backgroundColor = selectedStatus === status.id ? status.color : '';
+                tab.style.borderColor = status.color;
+                tab.onclick = () => switchStatusTab(status.id, 'anime');
+                statusTabs.appendChild(tab);
+            });
+        }
+
+        function renderMangaStatusTabs() {
+            const statusTabs = document.getElementById('manga-status-tabs');
+            if (!statusTabs) return;
+            
+            statusTabs.innerHTML = '';
+            
+            const allTab = document.createElement('div');
+            allTab.className = `status-tab ${selectedStatus === 'all' ? 'active' : ''}`;
+            allTab.textContent = `Все (${currentData.filter(item => item.type === 'manga').length})`;
+            allTab.onclick = () => switchStatusTab('all', 'manga');
+            statusTabs.appendChild(allTab);
+
+            const userData = getUserData();
+            userData.statuses.forEach(status => {
+                const count = currentData.filter(item => item.type === 'manga' && item.status === status.id).length;
+                const tab = document.createElement('div');
+                tab.className = `status-tab ${selectedStatus === status.id ? 'active' : ''}`;
+                tab.innerHTML = `${status.name} (${count})`;
+                tab.style.backgroundColor = selectedStatus === status.id ? status.color : '';
+                tab.style.borderColor = status.color;
+                tab.onclick = () => switchStatusTab(status.id, 'manga');
+                statusTabs.appendChild(tab);
+            });
+        }
+
+        function switchStatusTab(statusId, type) {
+            selectedStatus = statusId;
+            if (type === 'anime') {
+                renderAnimeStatusTabs();
+                renderAnimeList();
+            } else {
+                renderMangaStatusTabs();
+                renderMangaList();
+            }
+        }
+
+        function showQuickAddMenu() {
+            document.getElementById('quick-add-modal').style.display = 'flex';
+        }
+
+        function hideQuickAddMenu() {
+            document.getElementById('quick-add-modal').style.display = 'none';
+        }
+
+        function showAddStatusForm() {
+            editingStatus = null;
+            document.getElementById('status-modal-title').textContent = 'Создать статус';
+            document.getElementById('status-name').value = '';
+            selectedColor = '#8774e1';
+            document.getElementById('status-color').value = selectedColor;
+            
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.getAttribute('data-color') === selectedColor) {
+                    opt.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('status-modal').style.display = 'flex';
+        }
+
+        function showEditStatusForm(status) {
+            editingStatus = status;
+            document.getElementById('status-modal-title').textContent = 'Редактировать статус';
+            document.getElementById('status-name').value = status.name;
+            selectedColor = status.color;
+            document.getElementById('status-color').value = selectedColor;
+            
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.getAttribute('data-color') === selectedColor) {
+                    opt.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('status-modal').style.display = 'flex';
+        }
+
+        function hideStatusModal() {
+            document.getElementById('status-modal').style.display = 'none';
+        }
+
+        function saveStatus() {
+            const name = document.getElementById('status-name').value.trim();
+            if (!name) {
+                alert('📛 Введите название статуса');
+                return;
+            }
+            
+            if (!selectedColor || !selectedColor.startsWith('#')) {
+                alert('🎨 Выберите корректный цвет');
+                return;
+            }
+            
+            const userData = getUserData();
+            
+            if (editingStatus) {
+                const statusIndex = userData.statuses.findIndex(s => s.id === editingStatus.id);
+                if (statusIndex !== -1) {
+                    userData.statuses[statusIndex] = {
+                        ...userData.statuses[statusIndex],
+                        name: name,
+                        color: selectedColor
+                    };
+                }
+            } else {
+                const newStatus = {
+                    id: 'custom_' + Date.now(),
+                    name: name,
+                    color: selectedColor,
+                    isDefault: false
+                };
+                userData.statuses.push(newStatus);
+            }
+            
+            saveUserData(userData);
+            hideStatusModal();
+            renderStatusesList();
+            renderStatusTabs();
+            renderLists();
+        }
+
+        function deleteStatus(statusId) {
+            if (confirm('❓ Удалить этот статус? Все аниме и манга с этим статусом будут перемещены в статус "Смотрю".')) {
+                const userData = getUserData();
+                
+                currentData.forEach(item => {
+                    if (item.status === statusId) {
+                        item.status = 'watching';
+                    }
+                });
+                
+                userData.statuses = userData.statuses.filter(s => s.id !== statusId);
+                saveUserData(userData);
+                saveData();
+                
+                renderStatusesList();
+                renderStatusTabs();
+                renderLists();
+                updateStats();
+            }
+        }
+
+        function renderStatusesList() {
+            const userData = getUserData();
+            
+            const defaultList = document.getElementById('default-statuses-list');
+            if (defaultList) {
+                defaultList.innerHTML = '';
+                
+                const defaultStatuses = userData.statuses.filter(s => s.isDefault);
+                defaultStatuses.forEach(status => {
+                    const countAnime = currentData.filter(item => item.type === 'anime' && item.status === status.id).length;
+                    const countManga = currentData.filter(item => item.type === 'manga' && item.status === status.id).length;
+                    
+                    const statusElement = document.createElement('div');
+                    statusElement.className = 'status-item';
+                    statusElement.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <div class="status-color" style="background: ${status.color};"></div>
+                            <div>
+                                <div style="font-weight: 600;">${status.name}</div>
+                                <div style="font-size: 12px; color: #666;">${countAnime} аниме • ${countManga} манга</div>
+                            </div>
+                        </div>
+                        <div style="color: #666; font-size: 12px;">Стандартный</div>
+                    `;
+                    defaultList.appendChild(statusElement);
+                });
+            }
+            
+            const customList = document.getElementById('custom-statuses-list');
+            if (customList) {
+                customList.innerHTML = '';
+                
+                const customStatuses = userData.statuses.filter(s => !s.isDefault);
+                
+                if (customStatuses.length === 0) {
+                    customList.innerHTML = `
+                        <div style="text-align: center; color: #666; padding: 20px;">
+                            Нет пользовательских статусов
+                        </div>
+                    `;
+                    return;
+                }
+                
+                customStatuses.forEach(status => {
+                    const countAnime = currentData.filter(item => item.type === 'anime' && item.status === status.id).length;
+                    const countManga = currentData.filter(item => item.type === 'manga' && item.status === status.id).length;
+                    
+                    const statusElement = document.createElement('div');
+                    statusElement.className = 'status-item';
+                    statusElement.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <div class="status-color" style="background: ${status.color};"></div>
+                            <div>
+                                <div style="font-weight: 600;">${status.name}</div>
+                                <div style="font-size: 12px; color: #666;">${countAnime} аниме • ${countManga} манга</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="action-btn" onclick="showEditStatusForm(${JSON.stringify(status).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn" onclick="deleteStatus('${status.id}')" style="color: #f44336;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    customList.appendChild(statusElement);
+                });
             }
         }
 
@@ -663,9 +1005,22 @@
             currentType = type;
             document.getElementById('modal-title').textContent = 
                 type === 'anime' ? 'Добавить аниме' : 'Добавить мангу';
+            
+            const statusSelect = document.getElementById('item-status');
+            statusSelect.innerHTML = '';
+            
+            const userData = getUserData();
+            userData.statuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                statusSelect.appendChild(option);
+            });
+            
             document.getElementById('item-title').value = '';
             document.getElementById('item-total').value = '';
             document.getElementById('item-progress').value = '0';
+            document.getElementById('item-status').value = 'watching';
             currentRating = 0;
             setRating(0);
             document.getElementById('item-modal').style.display = 'flex';
@@ -691,6 +1046,7 @@
             const title = document.getElementById('item-title').value.trim();
             const total = parseInt(document.getElementById('item-total').value) || 0;
             const progress = parseInt(document.getElementById('item-progress').value) || 0;
+            const status = document.getElementById('item-status').value;
 
             if (!title) {
                 alert('📛 Введите название');
@@ -703,6 +1059,7 @@
                 total: total,
                 progress: progress,
                 rating: currentRating,
+                status: status,
                 type: currentType,
                 createdAt: new Date().toISOString()
             };
@@ -714,10 +1071,43 @@
             alert('✅ Успешно добавлено!');
         }
 
+        function getUserData() {
+            const defaultData = {
+                statuses: defaultStatuses
+            };
+            
+            try {
+                const stored = localStorage.getItem('animanga_settings');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    if (!data.statuses) {
+                        data.statuses = defaultStatuses;
+                    }
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+            
+            return defaultData;
+        }
+
+        function saveUserData(data) {
+            localStorage.setItem('animanga_settings', JSON.stringify(data));
+        }
+
         function loadData() {
             try {
                 const saved = localStorage.getItem('animanga_data');
                 currentData = saved ? JSON.parse(saved) : [];
+                
+                // Миграция: добавляем статус по умолчанию для старых записей
+                currentData.forEach(item => {
+                    if (!item.status) {
+                        item.status = 'watching';
+                    }
+                });
+                
                 renderLists();
                 updateStats();
             } catch (error) {
@@ -737,13 +1127,17 @@
 
         function renderAnimeList() {
             const animeList = document.getElementById('anime-list');
-            const animeItems = currentData.filter(item => item.type === 'anime');
+            let animeItems = currentData.filter(item => item.type === 'anime');
+            
+            if (selectedStatus !== 'all') {
+                animeItems = animeItems.filter(item => item.status === selectedStatus);
+            }
             
             if (animeItems.length === 0) {
                 animeList.innerHTML = `
                     <div class="card" style="text-align: center; color: #666;">
                         <i class="fas fa-tv" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <div>Нет добавленных аниме</div>
+                        <div>Нет аниме</div>
                         <button class="btn" onclick="showAddForm('anime')" style="margin-top: 15px;">
                             <i class="fas fa-plus"></i> Добавить первое аниме
                         </button>
@@ -752,9 +1146,12 @@
                 return;
             }
 
+            const userData = getUserData();
             let html = '';
             animeItems.forEach(item => {
                 const progressPercent = item.total ? (item.progress / item.total) * 100 : 0;
+                const statusInfo = userData.statuses.find(s => s.id === item.status) || { name: item.status, color: '#8774e1' };
+                
                 html += `
                     <div class="anime-item">
                         <div class="cover">
@@ -763,7 +1160,8 @@
                         <div class="content">
                             <div class="title">${item.title}</div>
                             <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
-                                ${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : 'Без рейтинга'}
+                                <span class="status-badge" style="background: ${statusInfo.color};">${statusInfo.name}</span>
+                                ${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : ''}
                             </div>
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${progressPercent}%"></div>
@@ -794,13 +1192,17 @@
 
         function renderMangaList() {
             const mangaList = document.getElementById('manga-list');
-            const mangaItems = currentData.filter(item => item.type === 'manga');
+            let mangaItems = currentData.filter(item => item.type === 'manga');
+            
+            if (selectedStatus !== 'all') {
+                mangaItems = mangaItems.filter(item => item.status === selectedStatus);
+            }
             
             if (mangaItems.length === 0) {
                 mangaList.innerHTML = `
                     <div class="card" style="text-align: center; color: #666;">
                         <i class="fas fa-book" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <div>Нет добавленной манги</div>
+                        <div>Нет манги</div>
                         <button class="btn" onclick="showAddForm('manga')" style="margin-top: 15px;">
                             <i class="fas fa-plus"></i> Добавить первую мангу
                         </button>
@@ -809,9 +1211,12 @@
                 return;
             }
 
+            const userData = getUserData();
             let html = '';
             mangaItems.forEach(item => {
                 const progressPercent = item.total ? (item.progress / item.total) * 100 : 0;
+                const statusInfo = userData.statuses.find(s => s.id === item.status) || { name: item.status, color: '#8774e1' };
+                
                 html += `
                     <div class="manga-item">
                         <div class="cover">
@@ -820,7 +1225,8 @@
                         <div class="content">
                             <div class="title">${item.title}</div>
                             <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
-                                ${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : 'Без рейтинга'}
+                                <span class="status-badge" style="background: ${statusInfo.color};">${statusInfo.name}</span>
+                                ${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5-item.rating) : ''}
                             </div>
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${progressPercent}%"></div>
@@ -857,6 +1263,7 @@
                 
                 if (item.total && newProgress > item.total) {
                     newProgress = item.total;
+                    item.status = 'completed';
                 }
                 
                 item.progress = newProgress;
@@ -864,6 +1271,7 @@
                 
                 saveData();
                 renderLists();
+                renderStatusTabs();
                 updateStats();
             }
         }
@@ -875,10 +1283,12 @@
                 if (item.total) {
                     item.progress = item.total;
                 }
+                item.status = 'completed';
                 item.lastUpdated = new Date().toISOString();
                 
                 saveData();
                 renderLists();
+                renderStatusTabs();
                 updateStats();
             }
         }
@@ -889,9 +1299,22 @@
                 currentType = item.type;
                 document.getElementById('modal-title').textContent = 
                     item.type === 'anime' ? 'Редактировать аниме' : 'Редактировать мангу';
+                
+                const statusSelect = document.getElementById('item-status');
+                statusSelect.innerHTML = '';
+                
+                const userData = getUserData();
+                userData.statuses.forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status.id;
+                    option.textContent = status.name;
+                    statusSelect.appendChild(option);
+                });
+                
                 document.getElementById('item-title').value = item.title;
                 document.getElementById('item-total').value = item.total;
                 document.getElementById('item-progress').value = item.progress;
+                document.getElementById('item-status').value = item.status;
                 setRating(item.rating || 0);
                 
                 // Удаляем старый элемент
@@ -906,6 +1329,7 @@
                 currentData = currentData.filter(item => item.id !== itemId);
                 saveData();
                 renderLists();
+                renderStatusTabs();
                 updateStats();
             }
         }
@@ -924,7 +1348,13 @@
         }
 
         function exportData() {
-            const dataStr = JSON.stringify(currentData, null, 2);
+            const userData = getUserData();
+            const exportData = {
+                items: currentData,
+                settings: userData
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
@@ -944,9 +1374,12 @@
         function clearAllData() {
             if (confirm('⚠️ ВЫ УВЕРЕНЫ? Это удалит все данные!')) {
                 localStorage.removeItem('animanga_data');
+                localStorage.removeItem('animanga_settings');
                 currentData = [];
                 renderLists();
                 updateStats();
+                renderStatusTabs();
+                renderStatusesList();
                 alert('🧹 Все данные очищены!');
             }
         }
@@ -956,4 +1389,4 @@
         });
     </script>
 </body>
-                </html>
+</html>
