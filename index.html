@@ -248,6 +248,13 @@
             font-size: 24px;
         }
 
+        .cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
         .content {
             flex: 1;
             min-width: 0;
@@ -942,6 +949,7 @@
         let selectedStatus = 'all';
         let selectedColor = '#8774e1';
         let editingStatus = null;
+        let editingItemId = null; // 🔧 ИСПРАВЛЕНИЕ: Добавлена переменная для отслеживания редактируемого элемента
 
         const defaultStatuses = [
             { id: 'watching', name: 'Смотрю', color: '#8774e1', isDefault: true },
@@ -1471,6 +1479,7 @@
 
         function showAddForm(type) {
             currentType = type;
+            editingItemId = null; // 🔧 ИСПРАВЛЕНИЕ: Сбрасываем ID редактирования при добавлении нового элемента
             document.getElementById('modal-title').textContent = 
                 type === 'anime' ? 'Добавить аниме' : 'Добавить мангу';
             
@@ -1496,6 +1505,7 @@
         }
 
         function hideModal() {
+            editingItemId = null; // 🔧 ИСПРАВЛЕНИЕ: Сбрасываем ID редактирования при закрытии модального окна
             document.getElementById('item-modal').style.display = 'none';
         }
 
@@ -1511,6 +1521,7 @@
             });
         }
 
+        // 🔧 ИСПРАВЛЕНИЕ: Обновленная функция saveItem для исправления бага редактирования
         function saveItem() {
             const title = document.getElementById('item-title').value.trim();
             const cover = document.getElementById('item-cover').value.trim();
@@ -1523,23 +1534,83 @@
                 return;
             }
 
-            const newItem = {
-                id: Date.now().toString(),
-                title: title,
-                cover: cover,
-                total: total,
-                progress: progress,
-                rating: currentRating,
-                status: status,
-                type: currentType,
-                createdAt: new Date().toISOString()
-            };
+            if (editingItemId) {
+                // 🔧 ИСПРАВЛЕНИЕ: Обновляем существующий элемент
+                const itemIndex = currentData.findIndex(item => item.id === editingItemId);
+                if (itemIndex !== -1) {
+                    currentData[itemIndex] = {
+                        ...currentData[itemIndex],
+                        title: title,
+                        cover: cover,
+                        total: total,
+                        progress: progress,
+                        rating: currentRating,
+                        status: status,
+                        lastUpdated: new Date().toISOString()
+                    };
+                }
+                editingItemId = null; // Сбрасываем ID редактирования
+            } else {
+                // Добавляем новый элемент
+                const newItem = {
+                    id: Date.now().toString(),
+                    title: title,
+                    cover: cover,
+                    total: total,
+                    progress: progress,
+                    rating: currentRating,
+                    status: status,
+                    type: currentType,
+                    createdAt: new Date().toISOString()
+                };
+                currentData.push(newItem);
+            }
 
-            currentData.push(newItem);
             saveData();
             renderLists();
             hideModal();
-            alert('✅ Успешно добавлено!');
+            alert('✅ Успешно сохранено!');
+        }
+
+        // 🔧 ИСПРАВЛЕНИЕ: Обновленная функция editItem для исправления бага редактирования
+        function editItem(itemId) {
+            const item = currentData.find(item => item.id === itemId);
+            if (item) {
+                currentType = item.type;
+                editingItemId = itemId; // 🔧 ИСПРАВЛЕНИЕ: Сохраняем ID для обновления
+                
+                document.getElementById('modal-title').textContent = 
+                    item.type === 'anime' ? 'Редактировать аниме' : 'Редактировать мангу';
+                
+                const statusSelect = document.getElementById('item-status');
+                statusSelect.innerHTML = '';
+                
+                const userData = getUserData();
+                userData.statuses.forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status.id;
+                    option.textContent = status.name;
+                    statusSelect.appendChild(option);
+                });
+                
+                document.getElementById('item-title').value = item.title;
+                document.getElementById('item-cover').value = item.cover || '';
+                document.getElementById('item-total').value = item.total;
+                document.getElementById('item-progress').value = item.progress;
+                document.getElementById('item-status').value = item.status;
+                setRating(item.rating || 0);
+                
+                document.getElementById('item-modal').style.display = 'flex';
+            }
+        }
+
+        // 🔧 ИСПРАВЛЕНИЕ: Функция для обработки ошибок загрузки изображений
+        function handleImageError(img) {
+            img.style.display = 'none';
+            const fallback = img.nextElementSibling;
+            if (fallback && fallback.classList.contains('cover')) {
+                fallback.style.display = 'flex';
+            }
         }
 
         function getUserData() {
@@ -1634,7 +1705,7 @@
                 html += `
                     <div class="anime-item">
                         ${item.cover ? 
-                            `<img src="${item.cover}" class="cover" alt="${item.title}" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"> 
+                            `<img src="${item.cover}" class="cover" alt="${item.title}" onerror="handleImageError(this)"> 
                              <div class="cover" style="display: none;"><i class="fas fa-tv"></i></div>` : 
                             `<div class="cover"><i class="fas fa-tv"></i></div>`
                         }
@@ -1701,7 +1772,7 @@
                 html += `
                     <div class="manga-item">
                         ${item.cover ? 
-                            `<img src="${item.cover}" class="cover" alt="${item.title}" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"> 
+                            `<img src="${item.cover}" class="cover" alt="${item.title}" onerror="handleImageError(this)"> 
                              <div class="cover" style="display: none;"><i class="fas fa-book"></i></div>` : 
                             `<div class="cover"><i class="fas fa-book"></i></div>`
                         }
@@ -1773,38 +1844,6 @@
                 renderLists();
                 renderStatusTabs();
                 updateStats();
-            }
-        }
-
-        function editItem(itemId) {
-            const item = currentData.find(item => item.id === itemId);
-            if (item) {
-                currentType = item.type;
-                document.getElementById('modal-title').textContent = 
-                    item.type === 'anime' ? 'Редактировать аниме' : 'Редактировать мангу';
-                
-                const statusSelect = document.getElementById('item-status');
-                statusSelect.innerHTML = '';
-                
-                const userData = getUserData();
-                userData.statuses.forEach(status => {
-                    const option = document.createElement('option');
-                    option.value = status.id;
-                    option.textContent = status.name;
-                    statusSelect.appendChild(option);
-                });
-                
-                document.getElementById('item-title').value = item.title;
-                document.getElementById('item-cover').value = item.cover || '';
-                document.getElementById('item-total').value = item.total;
-                document.getElementById('item-progress').value = item.progress;
-                document.getElementById('item-status').value = item.status;
-                setRating(item.rating || 0);
-                
-                // Удаляем старый элемент
-                currentData = currentData.filter(i => i.id !== itemId);
-                
-                document.getElementById('item-modal').style.display = 'flex';
             }
         }
 
