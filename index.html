@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AniManga Tracker PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { 
@@ -22,6 +23,12 @@
             min-height: 100vh;
             overflow-x: hidden;
             font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        body.light-theme {
+            background: #ffffff;
+            color: #333333;
         }
 
         .container {
@@ -39,6 +46,12 @@
             border-radius: 16px;
             margin-bottom: 16px;
             border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .header {
+            background: #8774e1;
+            border: 1px solid #e0e0e0;
         }
 
         .header h1 {
@@ -60,6 +73,12 @@
             margin-bottom: 16px;
             gap: 4px;
             border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .tabs {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
         }
 
         .tab {
@@ -74,6 +93,10 @@
             border: none;
             color: #888;
             font-size: 12px;
+        }
+
+        .light-theme .tab {
+            color: #666;
         }
 
         .tab.active {
@@ -104,12 +127,30 @@
             transform: scale(0.98);
         }
 
+        .btn-secondary {
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
         .card {
             background: #1a1a1a;
             border-radius: 14px;
             padding: 16px;
             margin-bottom: 12px;
             border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
         }
 
         .anime-item, .manga-item {
@@ -121,6 +162,12 @@
             align-items: center;
             gap: 12px;
             border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .anime-item, .light-theme .manga-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
         }
 
         .cover {
@@ -134,6 +181,12 @@
             justify-content: center;
             color: #666;
             font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .cover {
+            background: #e0e0e0;
+            color: #666;
         }
 
         .cover img {
@@ -149,6 +202,11 @@
             margin-bottom: 6px;
             color: #fff;
             line-height: 1.2;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .title {
+            color: #333;
         }
 
         .progress-bar {
@@ -157,6 +215,11 @@
             border-radius: 3px;
             margin: 8px 0;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .progress-bar {
+            background: #e0e0e0;
         }
 
         .progress-fill {
@@ -189,9 +252,19 @@
             border: 1px solid #3a3a3a;
         }
 
+        .light-theme .action-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
         .action-btn:active {
             transform: scale(0.95);
             background: #3a3a3a;
+        }
+
+        .light-theme .action-btn:active {
+            background: #f0f0f0;
         }
 
         .modal {
@@ -208,6 +281,10 @@
             z-index: 1000;
         }
 
+        .light-theme .modal {
+            background: rgba(0,0,0,0.5);
+        }
+
         .modal-content {
             background: #1a1a1a;
             border-radius: 18px;
@@ -217,6 +294,13 @@
             max-height: 85vh;
             overflow-y: auto;
             border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .modal-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
         }
 
         .form-control {
@@ -228,6 +312,13 @@
             background: #0a0a0a;
             color: #fff;
             margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .form-control {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
         }
 
         .form-control:focus {
@@ -248,6 +339,10 @@
             cursor: pointer;
             transition: color 0.2s;
             padding: 4px;
+        }
+
+        .light-theme .star {
+            color: #ddd;
         }
 
         .star.active {
@@ -283,6 +378,12 @@
             background: #1a1a1a;
             color: #fff;
             transition: all 0.2s ease;
+        }
+
+        .light-theme .status-tab {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            color: #333;
         }
 
         .status-tab.active {
@@ -351,6 +452,11 @@
             background: #0a0a0a;
         }
 
+        .light-theme .search-results {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
         .search-result-item {
             padding: 12px;
             border-bottom: 1px solid #2a2a2a;
@@ -361,8 +467,16 @@
             margin: 2px;
         }
 
+        .light-theme .search-result-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
         .search-result-item:active {
             background: #2a2a2a;
+        }
+
+        .light-theme .search-result-item:active {
+            background: #f0f0f0;
         }
 
         .stats-grid {
@@ -378,6 +492,12 @@
             border-radius: 12px;
             text-align: center;
             border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .light-theme .stat-card {
+            background: white;
+            border: 1px solid #e0e0e0;
         }
 
         .stat-value {
@@ -390,6 +510,10 @@
             font-size: 11px;
             color: #888;
             margin-top: 4px;
+        }
+
+        .light-theme .stat-label {
+            color: #666;
         }
 
         .quick-actions {
@@ -412,6 +536,12 @@
             transition: all 0.2s ease;
         }
 
+        .light-theme .quick-action-btn {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+
         .quick-action-btn:active {
             background: #8774e1;
             color: white;
@@ -423,6 +553,10 @@
             align-items: center;
             padding: 12px 0;
             border-bottom: 1px solid #2a2a2a;
+        }
+
+        .light-theme .settings-item {
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .switch {
@@ -448,6 +582,10 @@
             background-color: #2a2a2a;
             transition: .4s;
             border-radius: 26px;
+        }
+
+        .light-theme .slider {
+            background-color: #ccc;
         }
 
         .slider:before {
@@ -490,6 +628,12 @@
             transition: all 0.2s ease;
         }
 
+        .light-theme .lang-btn {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+
         .lang-btn.active {
             background: #8774e1;
             color: white;
@@ -517,10 +661,52 @@
             transform: scale(1.1);
         }
 
-        /* Убираем светлую тему, оставляем только темную */
-        .dark-theme {
-            background: #0a0a0a;
-            color: #ffffff;
+        .light-theme .color-option.selected {
+            border-color: #333;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            height: 200px;
+        }
+
+        .virtual-list-container {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #8774e1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         @media (max-width: 480px) {
@@ -555,7 +741,7 @@
                 <i class="fas fa-plus"></i> Добавить аниме
             </button>
             <div class="status-tabs" id="anime-status-tabs"></div>
-            <div id="anime-list">
+            <div id="anime-list" class="virtual-list-container">
                 <!-- Аниме будут здесь -->
             </div>
         </div>
@@ -565,7 +751,7 @@
                 <i class="fas fa-plus"></i> Добавить мангу
             </button>
             <div class="status-tabs" id="manga-status-tabs"></div>
-            <div id="manga-list">
+            <div id="manga-list" class="virtual-list-container">
                 <!-- Манга будет здесь -->
             </div>
         </div>
@@ -611,6 +797,32 @@
                         <div class="stat-label">Глав</div>
                     </div>
                 </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="completed-count">0</div>
+                        <div class="stat-label">Завершено</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="watching-count">0</div>
+                        <div class="stat-label">Смотрю</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="planned-count">0</div>
+                        <div class="stat-label">В планах</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="average-rating">0</div>
+                        <div class="stat-label">Средний рейтинг</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 style="margin-bottom: 16px;">📈 Графики</h4>
+                <div class="chart-container">
+                    <canvas id="stats-chart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -618,6 +830,14 @@
             <div class="card">
                 <h3 style="margin-bottom: 16px;">⚙️ Настройки</h3>
                 
+                <div class="settings-item">
+                    <span>🌙 Тёмная тема</span>
+                    <label class="switch">
+                        <input type="checkbox" id="theme-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
                 <div class="settings-item">
                     <span>🔔 Уведомления</span>
                     <label class="switch">
@@ -641,6 +861,15 @@
                         <div class="lang-btn" onclick="switchLanguage('en')">English</div>
                     </div>
                 </div>
+
+                <div style="margin: 16px 0;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">Размер текста</div>
+                    <div class="language-switcher">
+                        <div class="lang-btn active" onclick="changeFontSize('small')">Мелкий</div>
+                        <div class="lang-btn" onclick="changeFontSize('medium')">Средний</div>
+                        <div class="lang-btn" onclick="changeFontSize('large')">Крупный</div>
+                    </div>
+                </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
                     <button class="btn" onclick="exportData()">
@@ -650,15 +879,29 @@
                         <i class="fas fa-upload"></i> Импорт
                     </button>
                 </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
+                    <button class="btn btn-secondary" onclick="clearCache()">
+                        <i class="fas fa-broom"></i> Очистить кэш
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetSettings()">
+                        <i class="fas fa-redo"></i> Сбросить настройки
+                    </button>
+                </div>
                 
                 <button class="btn" onclick="clearAllData()" style="background: #d32f2f; margin-top: 8px;">
                     <i class="fas fa-trash"></i> Очистить все данные
                 </button>
+
+                <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
+                    Версия 2.1.0<br>
+                    <span id="storage-info">Загрузка...</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <button class="floating-btn" onclick="showQuickAddMenu()">
+    <button class="floating-btn pulse" onclick="showQuickAddMenu()">
         <i class="fas fa-plus"></i>
     </button>
 
@@ -713,7 +956,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно AniList -->
     <div id="anilist-modal" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 16px;">🔍 Поиск в AniList</h3>
@@ -757,7 +999,7 @@
 
     <script>
         // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-        console.log('🚀 AniManga Tracker PRO - Perfect Rounded Style');
+        console.log('🚀 AniManga Tracker PRO - Full Feature Version');
         
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -772,6 +1014,7 @@
         let selectedColor = '#8774e1';
         let editingStatus = null;
         let editingItemId = null;
+        let statsChart = null;
 
         const defaultStatuses = [
             { id: 'watching', name: 'Смотрю', color: '#8774e1', isDefault: true },
@@ -795,6 +1038,7 @@
             updateStats();
             renderStatusTabs();
             renderStatusesList();
+            updateStorageInfo();
             console.log('✅ Приложение загружено');
         }
 
@@ -807,6 +1051,11 @@
             });
 
             // Переключатели
+            document.getElementById('theme-toggle').addEventListener('change', function() {
+                toggleTheme(this.checked);
+                saveSettings();
+            });
+
             document.getElementById('notifications-toggle').addEventListener('change', saveSettings);
             document.getElementById('backup-toggle').addEventListener('change', saveSettings);
 
@@ -863,6 +1112,7 @@
             const targetTab = document.getElementById(tabName + '-tab');
             if (targetTab) {
                 targetTab.classList.remove('hidden');
+                targetTab.classList.add('fade-in');
             }
             
             // Обновить активную вкладку
@@ -874,33 +1124,54 @@
             // Особые действия для вкладок
             if (tabName === 'stats') {
                 updateStats();
+                renderChart();
             } else if (tabName === 'statuses') {
                 renderStatusesList();
             } else if (tabName === 'anime' || tabName === 'manga') {
                 renderStatusTabs();
+            }
+            
+            updateStorageInfo();
+        }
+
+        function toggleTheme(isDark) {
+            if (isDark) {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
             }
         }
 
         function loadSettings() {
             const settings = JSON.parse(localStorage.getItem('animanga_settings') || '{}');
             
+            // Тема
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.checked = settings.theme !== 'light';
+            toggleTheme(themeToggle.checked);
+            
             // Уведомления
             const notificationsToggle = document.getElementById('notifications-toggle');
-            if (notificationsToggle) {
-                notificationsToggle.checked = settings.notifications !== false;
-            }
+            notificationsToggle.checked = settings.notifications !== false;
             
             // Бэкап
             const backupToggle = document.getElementById('backup-toggle');
-            if (backupToggle) {
-                backupToggle.checked = settings.autoBackup !== false;
+            backupToggle.checked = settings.autoBackup !== false;
+            
+            // Размер шрифта
+            if (settings.fontSize) {
+                changeFontSize(settings.fontSize, false);
             }
         }
 
         function saveSettings() {
             const settings = {
+                theme: document.getElementById('theme-toggle').checked ? 'dark' : 'light',
                 notifications: document.getElementById('notifications-toggle').checked,
-                autoBackup: document.getElementById('backup-toggle').checked
+                autoBackup: document.getElementById('backup-toggle').checked,
+                fontSize: document.body.dataset.fontSize || 'small'
             };
             localStorage.setItem('animanga_settings', JSON.stringify(settings));
         }
@@ -911,6 +1182,18 @@
             });
             event.target.classList.add('active');
             alert(`🌐 Язык изменен на ${lang === 'ru' ? 'русский' : 'english'}`);
+        }
+
+        function changeFontSize(size, save = true) {
+            document.body.dataset.fontSize = size;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (save) {
+                saveSettings();
+            }
         }
 
         function showQuickAddMenu() {
@@ -1093,6 +1376,7 @@
         function saveData() {
             localStorage.setItem('animanga_data', JSON.stringify(currentData));
             console.log('💾 Данные сохранены, записей:', currentData.length);
+            updateStorageInfo();
         }
 
         function renderLists() {
@@ -1128,7 +1412,7 @@
                 const statusInfo = userData.statuses.find(s => s.id === item.status) || { name: item.status, color: '#8774e1' };
                 
                 html += `
-                    <div class="anime-item">
+                    <div class="anime-item fade-in">
                         ${item.cover ? 
                             `<img src="${item.cover}" class="cover" alt="${item.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"> 
                              <div class="cover" style="display: none;"><i class="fas fa-tv"></i></div>` : 
@@ -1194,7 +1478,7 @@
                 const statusInfo = userData.statuses.find(s => s.id === item.status) || { name: item.status, color: '#8774e1' };
                 
                 html += `
-                    <div class="manga-item">
+                    <div class="manga-item fade-in">
                         ${item.cover ? 
                             `<img src="${item.cover}" class="cover" alt="${item.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"> 
                              <div class="cover" style="display: none;"><i class="fas fa-book"></i></div>` : 
@@ -1429,18 +1713,84 @@
         function updateStats() {
             const animeItems = currentData.filter(item => item.type === 'anime');
             const mangaItems = currentData.filter(item => item.type === 'manga');
+            const allItems = [...animeItems, ...mangaItems];
             
             document.getElementById('total-anime').textContent = animeItems.length;
             document.getElementById('total-manga').textContent = mangaItems.length;
             document.getElementById('total-episodes').textContent = animeItems.reduce((sum, item) => sum + (item.progress || 0), 0);
             document.getElementById('total-chapters').textContent = mangaItems.reduce((sum, item) => sum + (item.progress || 0), 0);
+            
+            // Дополнительная статистика
+            document.getElementById('completed-count').textContent = allItems.filter(item => item.status === 'completed').length;
+            document.getElementById('watching-count').textContent = allItems.filter(item => item.status === 'watching').length;
+            document.getElementById('planned-count').textContent = allItems.filter(item => item.status === 'planned').length;
+            
+            const ratedItems = allItems.filter(item => item.rating > 0);
+            const averageRating = ratedItems.length > 0 ? 
+                (ratedItems.reduce((sum, item) => sum + item.rating, 0) / ratedItems.length).toFixed(1) : '0';
+            document.getElementById('average-rating').textContent = averageRating;
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('stats-chart').getContext('2d');
+            const userData = getUserData();
+            
+            if (statsChart) {
+                statsChart.destroy();
+            }
+            
+            const statusCounts = {};
+            userData.statuses.forEach(status => {
+                statusCounts[status.name] = currentData.filter(item => item.status === status.id).length;
+            });
+            
+            statsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: userData.statuses.map(s => s.name),
+                    datasets: [{
+                        data: userData.statuses.map(s => statusCounts[s.name]),
+                        backgroundColor: userData.statuses.map(s => s.color),
+                        borderWidth: 2,
+                        borderColor: document.body.classList.contains('dark-theme') ? '#1a1a1a' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: document.body.classList.contains('dark-theme') ? '#ffffff' : '#333333',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStorageInfo() {
+            let size = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    size += localStorage[key].length;
+                }
+            }
+            const kb = (size / 1024).toFixed(1);
+            document.getElementById('storage-info').textContent = `Использовано: ${kb} KB`;
         }
 
         function exportData() {
             const userData = getUserData();
             const exportData = {
                 items: currentData,
-                settings: userData
+                settings: userData,
+                exportDate: new Date().toISOString(),
+                version: '2.1.0'
             };
             
             const dataStr = JSON.stringify(exportData, null, 2);
@@ -1460,8 +1810,31 @@
             document.getElementById('import-file').click();
         }
 
+        function clearCache() {
+            if (confirm('Очистить кэш приложения?')) {
+                // Очищаем только временные данные, оставляя основные
+                const userData = getUserData();
+                const currentItems = currentData;
+                localStorage.clear();
+                localStorage.setItem('animanga_settings', JSON.stringify(userData));
+                localStorage.setItem('animanga_data', JSON.stringify(currentItems));
+                alert('✅ Кэш очищен!');
+                updateStorageInfo();
+            }
+        }
+
+        function resetSettings() {
+            if (confirm('Сбросить все настройки к значениям по умолчанию?')) {
+                const currentItems = currentData;
+                localStorage.clear();
+                localStorage.setItem('animanga_data', JSON.stringify(currentItems));
+                alert('✅ Настройки сброшены!');
+                location.reload();
+            }
+        }
+
         function clearAllData() {
-            if (confirm('⚠️ ВЫ УВЕРЕНЫ? Это удалит все данные!')) {
+            if (confirm('⚠️ ВЫ УВЕРЕНЫ? Это удалит ВСЕ данные без возможности восстановления!')) {
                 localStorage.clear();
                 alert('🧹 Все данные очищены!');
                 location.reload();
@@ -1485,7 +1858,7 @@
                 return;
             }
             
-            document.getElementById('anilist-results').innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Поиск...</div>';
+            document.getElementById('anilist-results').innerHTML = '<div style="padding: 12px; text-align: center; color: #888;"><div class="loading-spinner"></div> Поиск...</div>';
             document.getElementById('anilist-results').style.display = 'block';
             
             try {
@@ -1497,7 +1870,7 @@
                             <small>Скоро будет доступно!</small>
                         </div>
                     `;
-                }, 1000);
+                }, 1500);
             } catch (error) {
                 document.getElementById('anilist-results').innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Ошибка поиска</div>';
             }
@@ -1507,4 +1880,4 @@
         initApp();
     </script>
 </body>
-</html>
+    </html>
