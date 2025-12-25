@@ -104,6 +104,53 @@
             color: white;
         }
 
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .category-tab {
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            border: 1px solid #2a2a2a;
+            background: #1a1a1a;
+            color: #fff;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .light-theme .category-tab {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+
+        .category-tab.active {
+            background: #8774e1;
+            color: white;
+            border-color: #8774e1;
+        }
+
+        .category-tab.adult {
+            background: #d32f2f;
+            color: white;
+            border-color: #d32f2f;
+        }
+
+        .category-tab.adult.active {
+            background: #b71c1c;
+            border-color: #b71c1c;
+        }
+
         .btn {
             background: #8774e1;
             color: white;
@@ -153,7 +200,7 @@
             border: 1px solid #e0e0e0;
         }
 
-        .anime-item, .manga-item {
+        .item {
             background: #1a1a1a;
             border-radius: 14px;
             padding: 14px;
@@ -165,9 +212,13 @@
             transition: all 0.3s ease;
         }
 
-        .light-theme .anime-item, .light-theme .manga-item {
+        .light-theme .item {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
+        }
+
+        .item.adult {
+            border-left: 4px solid #d32f2f;
         }
 
         .cover {
@@ -608,38 +659,6 @@
             transform: translateX(20px);
         }
 
-        .language-switcher {
-            display: flex;
-            gap: 8px;
-            margin: 16px 0;
-        }
-
-        .lang-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            background: #1a1a1a;
-            color: #fff;
-            transition: all 0.2s ease;
-        }
-
-        .light-theme .lang-btn {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            color: #333;
-        }
-
-        .lang-btn.active {
-            background: #8774e1;
-            color: white;
-            border-color: #8774e1;
-        }
-
         .color-picker {
             display: flex;
             gap: 8px;
@@ -663,11 +682,6 @@
 
         .light-theme .color-option.selected {
             border-color: #333;
-        }
-
-        .chart-container {
-            margin: 20px 0;
-            height: 200px;
         }
 
         .virtual-list-container {
@@ -773,20 +787,6 @@
             background: #e0e0e0;
         }
 
-        .theme-option {
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .theme-option.selected {
-            border-color: #8774e1;
-        }
-
         .recommendation-item {
             padding: 12px;
             background: #1a1a1a;
@@ -821,16 +821,65 @@
             margin-top: 2px;
         }
 
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #1a1a1a;
+            margin: 10px 0;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .sync-status {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .sync-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .sync-indicator.offline {
+            background: #f44336;
+        }
+
+        .sync-indicator.syncing {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+
+        .custom-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .light-theme .custom-status-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+
         @media (max-width: 480px) {
             .container { padding: 10px; padding-bottom: 60px; }
             .header { padding: 14px; border-radius: 14px; }
             .header h1 { font-size: 16px; }
             .tab { padding: 8px 6px; font-size: 11px; }
             .btn { padding: 12px 16px; font-size: 13px; }
-            .anime-item, .manga-item { padding: 12px; }
+            .item { padding: 12px; }
             .cover { width: 45px; height: 60px; }
             .floating-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; }
             .avatar { width: 70px; height: 70px; }
+            .category-tab { padding: 8px 12px; font-size: 12px; }
         }
     </style>
 </head>
@@ -838,48 +887,23 @@
     <div class="container">
         <div class="header">
             <h1>🎌 AniManga Tracker PRO</h1>
-            <p>Отслеживай аниме и мангу</p>
+            <p>Отслеживай аниме, мангу, фильмы и сериалы</p>
         </div>
 
         <div class="tabs">
-            <button class="tab active" data-tab="anime">Аниме</button>
-            <button class="tab" data-tab="manga">Манга</button>
-            <button class="tab" data-tab="recommendations">Рекомендации</button>
+            <button class="tab active" data-tab="main">Главная</button>
             <button class="tab" data-tab="profile">Профиль</button>
+            <button class="tab" data-tab="recommendations">Рекомендации</button>
             <button class="tab" data-tab="settings">Настройки</button>
         </div>
 
-        <div id="anime-tab" class="tab-content">
-            <button class="btn" onclick="showAddForm('anime')">
-                <i class="fas fa-plus"></i> Добавить аниме
-            </button>
-            <div class="status-tabs" id="anime-status-tabs"></div>
-            <div id="anime-list" class="virtual-list-container">
-                <!-- Аниме будут здесь -->
-            </div>
-        </div>
-
-        <div id="manga-tab" class="tab-content hidden">
-            <button class="btn" onclick="showAddForm('manga')">
-                <i class="fas fa-plus"></i> Добавить мангу
-            </button>
-            <div class="status-tabs" id="manga-status-tabs"></div>
-            <div id="manga-list" class="virtual-list-container">
-                <!-- Манга будет здесь -->
-            </div>
-        </div>
-
-        <div id="recommendations-tab" class="tab-content hidden">
-            <div class="card">
-                <h3 style="margin-bottom: 12px;">🎯 Умные рекомендации</h3>
-                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях</p>
-                <button class="btn" onclick="generateRecommendations()">
-                    <i class="fas fa-sync"></i> Обновить рекомендации
-                </button>
+        <div id="main-tab" class="tab-content">
+            <div class="category-tabs" id="category-tabs">
+                <!-- Категории будут здесь -->
             </div>
 
-            <div id="recommendations-list">
-                <!-- Рекомендации будут здесь -->
+            <div id="content-lists">
+                <!-- Контент будет здесь -->
             </div>
         </div>
 
@@ -890,6 +914,11 @@
                 </div>
                 <h2 id="username">Пользователь</h2>
                 <p style="color: #888; margin-top: 4px;" id="user-level">Уровень 1 • 0 XP</p>
+                
+                <div class="sync-status" id="sync-status">
+                    <div class="sync-indicator" id="sync-indicator"></div>
+                    <span id="sync-text">Синхронизация...</span>
+                </div>
             </div>
 
             <div class="card">
@@ -904,12 +933,12 @@
                         <div class="stat-label">Манга</div>
                     </div>
                     <div class="stat-card">
-                        <div class="time-display" id="total-episodes-time">0м</div>
-                        <div class="time-label">Время просмотра</div>
+                        <div class="time-display" id="total-films">0</div>
+                        <div class="time-label">Фильмы/Сериалы</div>
                     </div>
                     <div class="stat-card">
-                        <div class="time-display" id="total-chapters-time">0гл</div>
-                        <div class="time-label">Прочитано глав</div>
+                        <div class="time-display" id="total-hentai">0</div>
+                        <div class="time-label">18+ Контент</div>
                     </div>
                 </div>
                 
@@ -960,6 +989,20 @@
             </div>
         </div>
 
+        <div id="recommendations-tab" class="tab-content hidden">
+            <div class="card">
+                <h3 style="margin-bottom: 12px;">🎯 Умные рекомендации</h3>
+                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях</p>
+                <button class="btn" onclick="generateRecommendations()">
+                    <i class="fas fa-sync"></i> Обновить рекомендации
+                </button>
+            </div>
+
+            <div id="recommendations-list">
+                <!-- Рекомендации будут здесь -->
+            </div>
+        </div>
+
         <div id="settings-tab" class="tab-content hidden">
             <div class="card">
                 <h3 style="margin-bottom: 16px;">⚙️ Настройки</h3>
@@ -984,10 +1027,28 @@
                     </div>
                 </div>
 
+                <div class="card">
+                    <h4 style="margin-bottom: 12px;">🎭 Пользовательские статусы</h4>
+                    <div id="custom-statuses-list">
+                        <!-- Пользовательские статусы будут здесь -->
+                    </div>
+                    <button class="btn" onclick="showAddStatusForm()" style="margin-top: 12px;">
+                        <i class="fas fa-plus"></i> Добавить статус
+                    </button>
+                </div>
+
                 <div class="settings-item">
                     <span>💾 Авто-бэкап</span>
                     <label class="switch">
                         <input type="checkbox" id="backup-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-item">
+                    <span>☁️ Авто-синхронизация</span>
+                    <label class="switch">
+                        <input type="checkbox" id="sync-toggle" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -1000,6 +1061,10 @@
                         <i class="fas fa-upload"></i> Импорт
                     </button>
                 </div>
+
+                <button class="btn" onclick="forceSync()">
+                    <i class="fas fa-sync"></i> Синхронизировать сейчас
+                </button>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
                     <button class="btn btn-secondary" onclick="clearCache()">
@@ -1015,8 +1080,9 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 2.4.0<br>
-                    <span id="storage-info">Загрузка...</span>
+                    Версия 3.0.0<br>
+                    <span id="storage-info">Загрузка...</span><br>
+                    <span id="cloud-status">Облако: проверка...</span>
                 </div>
             </div>
         </div>
@@ -1030,13 +1096,8 @@
     <div id="quick-add-modal" class="modal">
         <div class="modal-content">
             <h3 style="margin-bottom: 16px;">Быстрое добавление</h3>
-            <div style="display: flex; gap: 8px; margin-top: 16px;">
-                <button class="btn" onclick="showAddForm('anime'); hideQuickAddMenu();">
-                    <i class="fas fa-tv"></i> Аниме
-                </button>
-                <button class="btn" onclick="showAddForm('manga'); hideQuickAddMenu();">
-                    <i class="fas fa-book"></i> Манга
-                </button>
+            <div id="quick-add-options">
+                <!-- Опции будут здесь -->
             </div>
             <button class="btn" onclick="hideQuickAddMenu()" style="background: #666; margin-top: 8px;">
                 Отмена
@@ -1048,13 +1109,18 @@
         <div class="modal-content">
             <h3 style="margin-bottom: 16px;" id="modal-title">Добавить аниме</h3>
             
-            <button class="anilist-search-btn" onclick="showAniListSearch()">
-                <i class="fas fa-search"></i> Поиск в AniList
-            </button>
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button class="btn" onclick="showSearchModal()" style="flex: 1;">
+                    <i class="fas fa-search"></i> Поиск
+                </button>
+                <button class="btn" onclick="toggleAdult()" style="flex: 1; background: #d32f2f;" id="adult-toggle">
+                    <i class="fas fa-exclamation-triangle"></i> 18+
+                </button>
+            </div>
             
             <input type="text" id="item-title" class="form-control" placeholder="Название" required>
             <input type="text" id="item-cover" class="form-control" placeholder="URL обложки (опционально)">
-            <input type="number" id="item-total" class="form-control" placeholder="Всего эпизодов/глав" min="0">
+            <input type="number" id="item-total" class="form-control" placeholder="Всего эпизодов/глав/серий" min="0">
             <input type="number" id="item-progress" class="form-control" placeholder="Текущий прогресс" value="0" min="0">
             
             <select id="item-status" class="form-control" required>
@@ -1077,14 +1143,50 @@
         </div>
     </div>
 
-    <div id="anilist-search-modal" class="modal">
+    <div id="search-modal" class="modal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 16px;">Поиск в AniList</h3>
-            <input type="text" id="anilist-search" class="form-control" placeholder="Введите название аниме или манги">
-            <div class="search-results" id="anilist-results"></div>
+            <h3 style="margin-bottom: 16px;">Поиск контента</h3>
+            
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <select id="search-type" class="form-control" style="flex: 1;">
+                    <option value="anime">Аниме (AniList)</option>
+                    <option value="manga">Манга (AniList)</option>
+                    <option value="film">Фильмы/Сериалы (TMDB)</option>
+                </select>
+            </div>
+            
+            <input type="text" id="search-query" class="form-control" placeholder="Введите название">
+            <div class="search-results" id="search-results"></div>
             <div style="display: flex; gap: 8px; margin-top: 16px;">
-                <button class="btn" onclick="performAniListSearch()" style="flex: 2;">Искать</button>
-                <button class="btn" onclick="hideAniListSearch()" style="flex: 1; background: #666;">Отмена</button>
+                <button class="btn" onclick="performSearch()" style="flex: 2;">Искать</button>
+                <button class="btn" onclick="hideSearchModal()" style="flex: 1; background: #666;">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="status-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 16px;">Добавить пользовательский статус</h3>
+            
+            <input type="text" id="status-name" class="form-control" placeholder="Название статуса" required>
+            
+            <div style="margin: 16px 0;">
+                <div style="font-weight: 600; margin-bottom: 8px;">Цвет статуса</div>
+                <div class="color-picker">
+                    <div class="color-option" style="background: #8774e1;" onclick="selectStatusColor('#8774e1')"></div>
+                    <div class="color-option" style="background: #4caf50;" onclick="selectStatusColor('#4caf50')"></div>
+                    <div class="color-option" style="background: #ff9800;" onclick="selectStatusColor('#ff9800')"></div>
+                    <div class="color-option" style="background: #e91e63;" onclick="selectStatusColor('#e91e63')"></div>
+                    <div class="color-option" style="background: #9c27b0;" onclick="selectStatusColor('#9c27b0')"></div>
+                    <div class="color-option" style="background: #00bcd4;" onclick="selectStatusColor('#00bcd4')"></div>
+                    <div class="color-option" style="background: #8bc34a;" onclick="selectStatusColor('#8bc34a')"></div>
+                    <div class="color-option" style="background: #ff5722;" onclick="selectStatusColor('#ff5722')"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 20px;">
+                <button class="btn" onclick="saveCustomStatus()" style="flex: 2;">Сохранить</button>
+                <button class="btn" onclick="hideStatusModal()" style="flex: 1; background: #666;">Отмена</button>
             </div>
         </div>
     </div>
@@ -1092,87 +1194,282 @@
     <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
 
     <script>
-        // Константа версии для принудительного обновления кэша
-        const APP_VERSION = '2.4.0';
+        // Константа версии
+        const APP_VERSION = '3.0.0';
         
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Получаем ID пользователя для изоляции данных
+        // Получаем ID пользователя
         const userId = tg.initDataUnsafe?.user?.id || 'default';
         
-        // Проверка версии и сброс кэша при необходимости
-        if (localStorage.getItem('app_version') !== APP_VERSION) {
-            localStorage.setItem('app_version', APP_VERSION);
-            console.log('Cache updated to version:', APP_VERSION);
-        }
-
         // Глобальные переменные
-        let currentTab = 'anime';
+        let currentTab = 'main';
+        let currentCategory = 'anime';
         let currentEditingId = null;
         let currentType = 'anime';
         let selectedRating = 0;
+        let isAdultContent = false;
+        let selectedStatusColor = '#8774e1';
+        
+        // Данные
         let animeList = [];
         let mangaList = [];
+        let filmList = [];
+        let hentaiList = [];
         let customStatuses = [];
         let currentStatusFilter = 'all';
         let themeColor = '#8774e1';
+        let cloudStorage = null;
+        let isOnline = true;
+
+        // Категории контента
+        const categories = [
+            { id: 'anime', name: 'Аниме', icon: '🎬', color: '#8774e1' },
+            { id: 'manga', name: 'Манга', icon: '📚', color: '#4caf50' },
+            { id: 'film', name: 'Фильмы/Сериалы', icon: '🎥', color: '#ff9800' },
+            { id: 'hentai-anime', name: 'Хентай Аниме', icon: '🔞', color: '#d32f2f', adult: true },
+            { id: 'hentai-manga', name: 'Хентай Манга', icon: '🔞', color: '#d32f2f', adult: true }
+        ];
 
         // Стандартные статусы
         const defaultStatuses = [
             { id: 'watching', name: 'Смотрю', color: '#8774e1' },
             { id: 'completed', name: 'Завершено', color: '#4caf50' },
             { id: 'planned', name: 'В планах', color: '#ff9800' },
-            { id: 'dropped', name: 'Брошено', color: '#f44336' }
+            { id: 'dropped', name: 'Брошено', color: '#f44336' },
+            { id: 'favorite', name: 'Любимое', color: '#e91e63' },
+            { id: 'rewatching', name: 'Пересматриваю', color: '#9c27b0' }
         ];
 
         // Достижения
         const achievements = [
-            { id: 'first_anime', name: 'Новичок', description: 'Добавьте первое аниме', icon: '🎬', xp: 10 },
+            { id: 'first_entry', name: 'Новичок', description: 'Добавьте первую запись', icon: '🎬', xp: 10 },
             { id: 'anime_fan', name: 'Фанат аниме', description: 'Добавьте 10 аниме', icon: '📺', xp: 50 },
             { id: 'manga_reader', name: 'Читатель', description: 'Добавьте 5 манги', icon: '📚', xp: 30 },
-            { id: 'completionist', name: 'Завершитель', description: 'Завершите 5 тайтлов', icon: '🏆', xp: 100 },
-            { id: 'critic', name: 'Критик', description: 'Оцените 10 тайтлов', icon: '⭐', xp: 40 },
-            { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 100 серий', icon: '🍿', xp: 80 },
-            { id: 'veteran', name: 'Ветеран', description: 'Используйте трекер 30 дней', icon: '🎖️', xp: 150 },
-            { id: 'perfectionist', name: 'Перфекционист', description: 'Получите 5 звезд у 10 тайтлов', icon: '✨', xp: 200 },
-            { id: 'explorer', name: 'Исследователь', description: 'Добавьте тайтлы во все статусы', icon: '🧭', xp: 75 },
-            { id: 'collector', name: 'Коллекционер', description: 'Соберите 50 тайтлов', icon: '📦', xp: 120 }
+            { id: 'film_buff', name: 'Киноман', description: 'Добавьте 5 фильмов/сериалов', icon: '🎥', xp: 40 },
+            { id: 'completionist', name: 'Завершитель', description: 'Завершите 10 тайтлов', icon: '🏆', xp: 100 },
+            { id: 'critic', name: 'Критик', description: 'Оцените 20 тайтлов', icon: '⭐', xp: 80 },
+            { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 200 серий', icon: '🍿', xp: 120 },
+            { id: 'veteran', name: 'Ветеран', description: 'Используйте трекер 60 дней', icon: '🎖️', xp: 200 },
+            { id: 'collector', name: 'Коллекционер', description: 'Соберите 100 тайтлов', icon: '📦', xp: 150 },
+            { id: 'customizer', name: 'Кастомайзер', description: 'Создайте 5 пользовательских статусов', icon: '🎨', xp: 60 }
         ];
 
-        // Рекомендации (расширенный список)
+        // Рекомендации
         const sampleRecommendations = [
             { title: 'Attack on Titan', type: 'anime', reason: 'Похоже на ваши завершённые экшн-тайтлы' },
             { title: 'One Piece', type: 'manga', reason: 'Популярно среди фанатов длинных серий' },
             { title: 'Demon Slayer', type: 'anime', reason: 'Высокий рейтинг, подходит под ваши предпочтения' },
             { title: 'Tokyo Revengers', type: 'anime', reason: 'На основе ваших драматических тайтлов' },
             { title: 'Chainsaw Man', type: 'manga', reason: 'Новый хит, соответствует вашему стилю' },
-            { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' },
-            { title: 'My Hero Academia', type: 'anime', reason: 'Похоже на ваши superhero тайтлы' },
-            { title: 'Death Note', type: 'anime', reason: 'Классика, которую стоит посмотреть' },
-            { title: 'Naruto', type: 'anime', reason: 'Вечная классика для фанатов длинных серий' },
-            { title: 'Bleach', type: 'anime', reason: 'Культовый сёнэн с отличным экшеном' },
-            { title: 'One Punch Man', type: 'anime', reason: 'Юмористический подход к superhero жанру' },
-            { title: 'Mob Psycho 100', type: 'anime', reason: 'От создателя One Punch Man' },
-            { title: 'Vinland Saga', type: 'manga', reason: 'Исторический эпос высокого качества' },
-            { title: 'Berserk', type: 'manga', reason: 'Тёмное фэнтези для ценителей' },
-            { title: 'Vagabond', type: 'manga', reason: 'Философская манга о самураях' }
+            { title: 'Interstellar', type: 'film', reason: 'Фильм высокого рейтинга в жанре фантастики' },
+            { title: 'Breaking Bad', type: 'film', reason: 'Культовый сериал в жанре драмы' },
+            { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' }
         ];
 
         // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            initializeStars();
-            updateStorageInfo();
-            setupEventListeners();
-            renderStatusTabs();
-            renderLists();
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeApp();
+        });
+
+        async function initializeApp() {
+            try {
+                // Проверяем версию
+                if (localStorage.getItem('app_version') !== APP_VERSION) {
+                    localStorage.setItem('app_version', APP_VERSION);
+                }
+
+                // Инициализируем облачное хранилище
+                await initCloudStorage();
+                
+                // Загружаем данные
+                await loadData();
+                
+                // Настраиваем интерфейс
+                setupEventListeners();
+                initializeStars();
+                renderCategoryTabs();
+                renderLists();
+                updateStats();
+                updateAchievements();
+                updateProfile();
+                updateStorageInfo();
+                updateSyncStatus();
+                
+                // Показываем рекомендации
+                generateRecommendations();
+                
+            } catch (error) {
+                console.error('Ошибка инициализации:', error);
+                showNotification('Ошибка загрузки приложения');
+            }
+        }
+
+        async function initCloudStorage() {
+            // Проверяем доступность облачного хранилища Telegram
+            if (tg && tg.CloudStorage) {
+                try {
+                    cloudStorage = tg.CloudStorage;
+                    isOnline = true;
+                    console.log('Облачное хранилище доступно');
+                } catch (error) {
+                    console.log('Облачное хранилище недоступно:', error);
+                    cloudStorage = null;
+                    isOnline = false;
+                }
+            } else {
+                cloudStorage = null;
+                isOnline = navigator.onLine;
+            }
+        }
+
+        async function loadData() {
+            // Пытаемся загрузить из облачного хранилища
+            if (cloudStorage && document.getElementById('sync-toggle').checked) {
+                try {
+                    const cloudData = await loadFromCloud();
+                    if (cloudData) {
+                        loadFromObject(cloudData);
+                        return;
+                    }
+                } catch (error) {
+                    console.log('Ошибка загрузки из облака:', error);
+                }
+            }
+            
+            // Загружаем из localStorage
+            loadFromLocal();
+        }
+
+        async function loadFromCloud() {
+            const keys = ['animeList', 'mangaList', 'filmList', 'hentaiList', 'customStatuses', 'settings', 'userData'];
+            const data = {};
+            
+            for (const key of keys) {
+                const cloudKey = `${key}_${userId}`;
+                try {
+                    const value = await new Promise((resolve) => {
+                        cloudStorage.getItem(cloudKey, (err, value) => {
+                            if (err) resolve(null);
+                            else resolve(value);
+                        });
+                    });
+                    
+                    if (value) {
+                        data[key] = JSON.parse(value);
+                    }
+                } catch (error) {
+                    console.log(`Ошибка загрузки ${key}:`, error);
+                }
+            }
+            
+            return Object.keys(data).length > 0 ? data : null;
+        }
+
+        function loadFromLocal() {
+            animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
+            mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
+            filmList = JSON.parse(localStorage.getItem(`filmList_${userId}`)) || [];
+            hentaiList = JSON.parse(localStorage.getItem(`hentaiList_${userId}`)) || [];
+            customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
+            
+            const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
+            document.getElementById('theme-toggle').checked = !settings.lightTheme;
+            document.body.classList.toggle('light-theme', settings.lightTheme);
+            document.getElementById('backup-toggle').checked = settings.autoBackup !== false;
+            document.getElementById('sync-toggle').checked = settings.autoSync !== false;
+            
+            themeColor = settings.themeColor || '#8774e1';
+            updateThemeColors();
+        }
+
+        function loadFromObject(data) {
+            animeList = data.animeList || [];
+            mangaList = data.mangaList || [];
+            filmList = data.filmList || [];
+            hentaiList = data.hentaiList || [];
+            customStatuses = data.customStatuses || [];
+            
+            const settings = data.settings || {};
+            document.getElementById('theme-toggle').checked = !settings.lightTheme;
+            document.body.classList.toggle('light-theme', settings.lightTheme);
+            document.getElementById('backup-toggle').checked = settings.autoBackup !== false;
+            document.getElementById('sync-toggle').checked = settings.autoSync !== false;
+            
+            themeColor = settings.themeColor || '#8774e1';
+            updateThemeColors();
+            
+            // Сохраняем в localStorage как резерв
+            saveToLocal();
+        }
+
+        async function saveData() {
+            // Сохраняем в localStorage
+            saveToLocal();
+            
+            // Сохраняем в облако если включено
+            if (cloudStorage && document.getElementById('sync-toggle').checked) {
+                await saveToCloud();
+            }
+            
+            // Обновляем UI
             updateStats();
+            updateStorageInfo();
             updateAchievements();
             updateProfile();
-        });
+            updateSyncStatus();
+        }
+
+        function saveToLocal() {
+            localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
+            localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
+            localStorage.setItem(`filmList_${userId}`, JSON.stringify(filmList));
+            localStorage.setItem(`hentaiList_${userId}`, JSON.stringify(hentaiList));
+            localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
+            
+            const settings = {
+                lightTheme: document.body.classList.contains('light-theme'),
+                autoBackup: document.getElementById('backup-toggle').checked,
+                autoSync: document.getElementById('sync-toggle').checked,
+                themeColor: themeColor
+            };
+            localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
+        }
+
+        async function saveToCloud() {
+            if (!cloudStorage) return;
+            
+            const data = {
+                animeList: animeList,
+                mangaList: mangaList,
+                filmList: filmList,
+                hentaiList: hentaiList,
+                customStatuses: customStatuses,
+                settings: {
+                    lightTheme: document.body.classList.contains('light-theme'),
+                    autoBackup: document.getElementById('backup-toggle').checked,
+                    autoSync: document.getElementById('sync-toggle').checked,
+                    themeColor: themeColor
+                }
+            };
+            
+            for (const [key, value] of Object.entries(data)) {
+                const cloudKey = `${key}_${userId}`;
+                try {
+                    await new Promise((resolve, reject) => {
+                        cloudStorage.setItem(cloudKey, JSON.stringify(value), (err) => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
+                    });
+                } catch (error) {
+                    console.log(`Ошибка сохранения ${key}:`, error);
+                }
+            }
+        }
 
         function setupEventListeners() {
             // Переключение темы
@@ -1196,65 +1493,37 @@
                 }
             });
 
-            // Поиск в AniList при нажатии Enter
-            document.getElementById('anilist-search').addEventListener('keypress', function(e) {
+            // Поиск при нажатии Enter
+            document.getElementById('search-query').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    performAniListSearch();
+                    performSearch();
                 }
             });
 
-            // Авто-бэкап
-            document.getElementById('backup-toggle').addEventListener('change', function(e) {
-                saveSettings();
-                showNotification(e.target.checked ? 'Авто-бэкап включен' : 'Авто-бэкап выключен');
-            });
+            // Настройки
+            document.getElementById('backup-toggle').addEventListener('change', saveSettings);
+            document.getElementById('sync-toggle').addEventListener('change', saveSettings);
 
-            // Исправление переключения вкладок
+            // Переключение вкладок
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabName = this.getAttribute('data-tab');
                     switchTab(tabName);
                 });
             });
-        }
 
-        function loadData() {
-            // Загрузка данных из localStorage с привязкой к ID пользователя
-            animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
-            mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
-            customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
+            // Следим за онлайн-статусом
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateSyncStatus();
+            });
             
-            // Загрузка настроек
-            const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
-            document.getElementById('theme-toggle').checked = !settings.lightTheme;
-            document.body.classList.toggle('light-theme', settings.lightTheme);
-            document.getElementById('backup-toggle').checked = settings.autoBackup !== false;
-            
-            // Загрузка цвета темы
-            themeColor = settings.themeColor || '#8774e1';
-            updateThemeColors();
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateSyncStatus();
+            });
         }
 
-        function saveData() {
-            localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
-            localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
-            localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
-            updateStats();
-            updateStorageInfo();
-            updateAchievements();
-            updateProfile();
-        }
-
-        function saveSettings() {
-            const settings = {
-                lightTheme: document.body.classList.contains('light-theme'),
-                autoBackup: document.getElementById('backup-toggle').checked,
-                themeColor: themeColor
-            };
-            localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
-        }
-
-        // ИСПРАВЛЕНИЕ: Правильное переключение вкладок
         function switchTab(tabName) {
             currentTab = tabName;
             
@@ -1265,7 +1534,7 @@
             document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
             document.getElementById(tabName + '-tab').classList.remove('hidden');
             
-            if (tabName === 'anime' || tabName === 'manga') {
+            if (tabName === 'main') {
                 renderLists();
             } else if (tabName === 'profile') {
                 updateStats();
@@ -1274,27 +1543,199 @@
             }
         }
 
+        function renderCategoryTabs() {
+            const container = document.getElementById('category-tabs');
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const tab = document.createElement('button');
+                tab.className = `category-tab ${category.adult ? 'adult' : ''} ${category.id === currentCategory ? 'active' : ''}`;
+                tab.innerHTML = `${category.icon} ${category.name}`;
+                tab.onclick = () => {
+                    currentCategory = category.id;
+                    renderCategoryTabs();
+                    renderLists();
+                };
+                container.appendChild(tab);
+            });
+        }
+
+        function renderLists() {
+            const container = document.getElementById('content-lists');
+            container.innerHTML = '';
+            
+            // Добавляем кнопку добавления
+            const addButton = document.createElement('button');
+            addButton.className = 'btn';
+            addButton.innerHTML = '<i class="fas fa-plus"></i> Добавить';
+            addButton.onclick = () => showAddForm(currentCategory);
+            container.appendChild(addButton);
+            
+            // Добавляем статус-табы
+            const statusTabs = document.createElement('div');
+            statusTabs.className = 'status-tabs';
+            statusTabs.id = 'current-status-tabs';
+            container.appendChild(statusTabs);
+            renderStatusTabs();
+            
+            // Добавляем список
+            const listContainer = document.createElement('div');
+            listContainer.className = 'virtual-list-container';
+            listContainer.id = 'current-list';
+            container.appendChild(listContainer);
+            
+            renderCurrentList();
+        }
+
+        function renderStatusTabs() {
+            const container = document.getElementById('current-status-tabs');
+            const allStatuses = [
+                { id: 'all', name: 'Все', color: themeColor },
+                ...defaultStatuses,
+                ...customStatuses
+            ];
+            
+            container.innerHTML = '';
+            allStatuses.forEach(status => {
+                const tab = document.createElement('div');
+                tab.className = `status-tab ${status.id === currentStatusFilter ? 'active' : ''}`;
+                tab.style.backgroundColor = status.id === currentStatusFilter ? status.color : '';
+                tab.style.borderColor = status.id === currentStatusFilter ? status.color : '';
+                tab.textContent = status.name;
+                tab.onclick = () => {
+                    currentStatusFilter = status.id;
+                    renderStatusTabs();
+                    renderCurrentList();
+                };
+                container.appendChild(tab);
+            });
+        }
+
+        function renderCurrentList() {
+            const container = document.getElementById('current-list');
+            let list = [];
+            
+            // Выбираем нужный список
+            switch(currentCategory) {
+                case 'anime':
+                    list = animeList;
+                    break;
+                case 'manga':
+                    list = mangaList;
+                    break;
+                case 'film':
+                    list = filmList;
+                    break;
+                case 'hentai-anime':
+                    list = hentaiList.filter(item => item.type === 'hentai-anime');
+                    break;
+                case 'hentai-manga':
+                    list = hentaiList.filter(item => item.type === 'hentai-manga');
+                    break;
+            }
+            
+            // Фильтруем по статусу
+            const filteredList = currentStatusFilter === 'all' 
+                ? list 
+                : list.filter(item => item.status === currentStatusFilter);
+            
+            container.innerHTML = '';
+            
+            if (filteredList.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">Нет контента</div>';
+                return;
+            }
+            
+            filteredList.forEach(item => {
+                const status = [...defaultStatuses, ...customStatuses].find(s => s.id === item.status);
+                const progressPercent = item.total > 0 ? (item.progress / item.total) * 100 : 0;
+                const isAdult = item.isAdult || currentCategory.includes('hentai');
+                
+                const itemElement = document.createElement('div');
+                itemElement.className = `item fade-in ${isAdult ? 'adult' : ''}`;
+                itemElement.innerHTML = `
+                    <div class="cover">
+                        ${item.cover ? `<img src="${item.cover}" alt="${item.title}" onerror="this.style.display='none'">` : 
+                          currentCategory === 'anime' || currentCategory === 'hentai-anime' ? '<i class="fas fa-tv"></i>' :
+                          currentCategory === 'manga' || currentCategory === 'hentai-manga' ? '<i class="fas fa-book"></i>' :
+                          '<i class="fas fa-film"></i>'}
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="title">${item.title} ${isAdult ? '🔞' : ''}</div>
+                        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
+                            ${item.progress}/${item.total || '?'} 
+                            ${currentCategory === 'anime' || currentCategory === 'hentai-anime' ? 'эп.' :
+                              currentCategory === 'manga' || currentCategory === 'hentai-manga' ? 'гл.' : 'серий'}
+                            ${item.rating ? '• ★'.repeat(item.rating) : ''}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                        <div style="display: flex; gap: 4px; margin-top: 6px;">
+                            <span class="status-badge" style="background: ${status?.color || '#8774e1'}">${status?.name || 'Без статуса'}</span>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="action-btn" onclick="editItem('${currentCategory}', '${item.id}')" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn" onclick="incrementProgress('${currentCategory}', '${item.id}')" title="+1">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="action-btn" onclick="deleteItem('${currentCategory}', '${item.id}')" title="Удалить" style="background: #d32f2f;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemElement);
+            });
+        }
+
         function showQuickAddMenu() {
-            document.getElementById('quick-add-modal').style.display = 'flex';
+            const modal = document.getElementById('quick-add-modal');
+            const container = document.getElementById('quick-add-options');
+            
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.className = `btn ${category.adult ? 'adult' : ''}`;
+                button.style.backgroundColor = category.adult ? '#d32f2f' : category.color;
+                button.innerHTML = `${category.icon} ${category.name}`;
+                button.onclick = () => {
+                    showAddForm(category.id);
+                    hideQuickAddMenu();
+                };
+                container.appendChild(button);
+            });
+            
+            modal.style.display = 'flex';
         }
 
         function hideQuickAddMenu() {
             document.getElementById('quick-add-modal').style.display = 'none';
         }
 
-        function showAddForm(type) {
-            currentType = type;
+        function showAddForm(category) {
+            currentType = category;
             currentEditingId = null;
             selectedRating = 0;
+            isAdultContent = category.includes('hentai');
             
             const modal = document.getElementById('item-modal');
             const title = document.getElementById('modal-title');
-            const totalPlaceholder = type === 'anime' ? 'Всего эпизодов' : 'Всего глав';
-            const progressPlaceholder = type === 'anime' ? 'Текущий прогресс' : 'Прочитано глав';
+            const adultToggle = document.getElementById('adult-toggle');
             
-            title.textContent = currentEditingId ? 'Редактировать ' + (type === 'anime' ? 'аниме' : 'мангy') : 'Добавить ' + (type === 'anime' ? 'аниме' : 'мангy');
-            document.getElementById('item-total').placeholder = totalPlaceholder;
-            document.getElementById('item-progress').placeholder = progressPlaceholder;
+            // Устанавливаем заголовок
+            const categoryName = categories.find(c => c.id === category)?.name || 'Контент';
+            title.textContent = `Добавить ${categoryName}`;
+            
+            // Настраиваем кнопку 18+
+            adultToggle.style.display = category.includes('hentai') ? 'none' : 'flex';
+            adultToggle.innerHTML = isAdultContent ? 
+                '<i class="fas fa-exclamation-triangle"></i> 18+' :
+                '<i class="fas fa-exclamation-triangle"></i> 18+';
+            adultToggle.style.backgroundColor = isAdultContent ? '#4caf50' : '#d32f2f';
             
             // Очистка формы
             document.getElementById('item-title').value = '';
@@ -1317,9 +1758,19 @@
             modal.style.display = 'flex';
         }
 
+        function toggleAdult() {
+            isAdultContent = !isAdultContent;
+            const adultToggle = document.getElementById('adult-toggle');
+            adultToggle.innerHTML = isAdultContent ? 
+                '<i class="fas fa-check"></i> 18+' :
+                '<i class="fas fa-exclamation-triangle"></i> 18+';
+            adultToggle.style.backgroundColor = isAdultContent ? '#4caf50' : '#d32f2f';
+        }
+
         function hideModal() {
             document.getElementById('item-modal').style.display = 'none';
-            document.getElementById('anilist-search-modal').style.display = 'none';
+            document.getElementById('search-modal').style.display = 'none';
+            document.getElementById('status-modal').style.display = 'none';
         }
 
         function initializeStars() {
@@ -1335,7 +1786,7 @@
             });
         }
 
-        function saveItem() {
+        async function saveItem() {
             const title = document.getElementById('item-title').value.trim();
             const cover = document.getElementById('item-cover').value.trim();
             const total = parseInt(document.getElementById('item-total').value) || 0;
@@ -1355,11 +1806,24 @@
                 progress: progress,
                 status: status,
                 rating: selectedRating,
+                type: currentType,
+                isAdult: isAdultContent || currentType.includes('hentai'),
                 createdAt: currentEditingId ? null : new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
             
-            const list = currentType === 'anime' ? animeList : mangaList;
+            // Выбираем нужный список
+            let list;
+            if (currentType.includes('hentai')) {
+                list = hentaiList;
+            } else {
+                switch(currentType) {
+                    case 'anime': list = animeList; break;
+                    case 'manga': list = mangaList; break;
+                    case 'film': list = filmList; break;
+                    default: list = animeList;
+                }
+            }
             
             if (currentEditingId) {
                 const index = list.findIndex(i => i.id === currentEditingId);
@@ -1372,163 +1836,41 @@
                 addExperience(5);
             }
             
-            saveData();
+            await saveData();
             renderLists();
             hideModal();
             
             showNotification(currentEditingId ? 'Обновлено!' : 'Добавлено!');
         }
 
-        function renderLists() {
-            renderAnimeList();
-            renderMangaList();
-        }
-
-        function renderAnimeList() {
-            const container = document.getElementById('anime-list');
-            const filteredAnime = currentStatusFilter === 'all' 
-                ? animeList 
-                : animeList.filter(anime => anime.status === currentStatusFilter);
-            
-            container.innerHTML = '';
-            
-            if (filteredAnime.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">Нет аниме</div>';
-                return;
-            }
-            
-            filteredAnime.forEach(anime => {
-                const status = [...defaultStatuses, ...customStatuses].find(s => s.id === anime.status);
-                const progressPercent = anime.total > 0 ? (anime.progress / anime.total) * 100 : 0;
-                
-                const item = document.createElement('div');
-                item.className = 'anime-item fade-in';
-                item.innerHTML = `
-                    <div class="cover">
-                        ${anime.cover ? `<img src="${anime.cover}" alt="${anime.title}" onerror="this.style.display='none'">` : '<i class="fas fa-tv"></i>'}
-                    </div>
-                    <div style="flex: 1;">
-                        <div class="title">${anime.title}</div>
-                        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
-                            ${anime.progress}/${anime.total || '?'} эп.
-                            ${anime.rating ? '• ★'.repeat(anime.rating) : ''}
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                        </div>
-                        <div style="display: flex; gap: 4px; margin-top: 6px;">
-                            <span class="status-badge" style="background: ${status?.color || '#8774e1'}">${status?.name || 'Без статуса'}</span>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button class="action-btn" onclick="editItem('anime', '${anime.id}')" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn" onclick="incrementProgress('anime', '${anime.id}')" title="+1 эп.">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button class="action-btn" onclick="deleteItem('anime', '${anime.id}')" title="Удалить" style="background: #d32f2f;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function renderMangaList() {
-            const container = document.getElementById('manga-list');
-            const filteredManga = currentStatusFilter === 'all' 
-                ? mangaList 
-                : mangaList.filter(manga => manga.status === currentStatusFilter);
-            
-            container.innerHTML = '';
-            
-            if (filteredManga.length === 0) {
-                container.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">Нет манги</div>';
-                return;
-            }
-            
-            filteredManga.forEach(manga => {
-                const status = [...defaultStatuses, ...customStatuses].find(s => s.id === manga.status);
-                const progressPercent = manga.total > 0 ? (manga.progress / manga.total) * 100 : 0;
-                
-                const item = document.createElement('div');
-                item.className = 'manga-item fade-in';
-                item.innerHTML = `
-                    <div class="cover">
-                        ${manga.cover ? `<img src="${manga.cover}" alt="${manga.title}" onerror="this.style.display='none'">` : '<i class="fas fa-book"></i>'}
-                    </div>
-                    <div style="flex: 1;">
-                        <div class="title">${manga.title}</div>
-                        <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
-                            ${manga.progress}/${manga.total || '?'} гл.
-                            ${manga.rating ? '• ★'.repeat(manga.rating) : ''}
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
-                        </div>
-                        <div style="display: flex; gap: 4px; margin-top: 6px;">
-                            <span class="status-badge" style="background: ${status?.color || '#8774e1'}">${status?.name || 'Без статуса'}</span>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button class="action-btn" onclick="editItem('manga', '${manga.id}')" title="Редактировать">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn" onclick="incrementProgress('manga', '${manga.id}')" title="+1 гл.">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button class="action-btn" onclick="deleteItem('manga', '${manga.id}')" title="Удалить" style="background: #d32f2f;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function renderStatusTabs() {
-            const animeTabs = document.getElementById('anime-status-tabs');
-            const mangaTabs = document.getElementById('manga-status-tabs');
-            
-            const allStatuses = [
-                { id: 'all', name: 'Все', color: '#8774e1' },
-                ...defaultStatuses,
-                ...customStatuses
-            ];
-            
-            function createTabs(container) {
-                container.innerHTML = '';
-                allStatuses.forEach(status => {
-                    const tab = document.createElement('div');
-                    tab.className = `status-tab ${status.id === currentStatusFilter ? 'active' : ''}`;
-                    tab.style.backgroundColor = status.id === currentStatusFilter ? status.color : '';
-                    tab.style.borderColor = status.id === currentStatusFilter ? status.color : '';
-                    tab.textContent = status.name;
-                    tab.onclick = () => {
-                        currentStatusFilter = status.id;
-                        renderStatusTabs();
-                        renderLists();
-                    };
-                    container.appendChild(tab);
-                });
-            }
-            
-            createTabs(animeTabs);
-            createTabs(mangaTabs);
-        }
-
         function editItem(type, id) {
             currentType = type;
             currentEditingId = id;
             
-            const list = type === 'anime' ? animeList : mangaList;
-            const item = list.find(i => i.id === id);
+            let list;
+            if (type.includes('hentai')) {
+                list = hentaiList;
+            } else {
+                switch(type) {
+                    case 'anime': list = animeList; break;
+                    case 'manga': list = mangaList; break;
+                    case 'film': list = filmList; break;
+                    default: list = animeList;
+                }
+            }
             
+            const item = list.find(i => i.id === id);
             if (!item) return;
             
-            document.getElementById('modal-title').textContent = 'Редактировать ' + (type === 'anime' ? 'аниме' : 'мангy');
+            const modal = document.getElementById('item-modal');
+            const title = document.getElementById('modal-title');
+            const adultToggle = document.getElementById('adult-toggle');
+            
+            // Устанавливаем заголовок
+            const categoryName = categories.find(c => c.id === type)?.name || 'Контент';
+            title.textContent = `Редактировать ${categoryName}`;
+            
+            // Заполняем форму
             document.getElementById('item-title').value = item.title;
             document.getElementById('item-cover').value = item.cover || '';
             document.getElementById('item-total').value = item.total || '';
@@ -1551,28 +1893,55 @@
                 star.classList.toggle('active', parseInt(star.getAttribute('data-rating')) <= selectedRating);
             });
             
-            document.getElementById('item-modal').style.display = 'flex';
+            // Настройка кнопки 18+
+            isAdultContent = item.isAdult || false;
+            adultToggle.style.display = type.includes('hentai') ? 'none' : 'flex';
+            adultToggle.innerHTML = isAdultContent ? 
+                '<i class="fas fa-check"></i> 18+' :
+                '<i class="fas fa-exclamation-triangle"></i> 18+';
+            adultToggle.style.backgroundColor = isAdultContent ? '#4caf50' : '#d32f2f';
+            
+            modal.style.display = 'flex';
         }
 
-        function deleteItem(type, id) {
+        async function deleteItem(type, id) {
             if (!confirm('Удалить?')) return;
             
-            const list = type === 'anime' ? animeList : mangaList;
-            const index = list.findIndex(i => i.id === id);
+            let list;
+            if (type.includes('hentai')) {
+                list = hentaiList;
+            } else {
+                switch(type) {
+                    case 'anime': list = animeList; break;
+                    case 'manga': list = mangaList; break;
+                    case 'film': list = filmList; break;
+                    default: list = animeList;
+                }
+            }
             
+            const index = list.findIndex(i => i.id === id);
             if (index !== -1) {
                 list.splice(index, 1);
-                saveData();
+                await saveData();
                 renderLists();
-                
                 showNotification('Удалено!');
             }
         }
 
-        function incrementProgress(type, id) {
-            const list = type === 'anime' ? animeList : mangaList;
-            const item = list.find(i => i.id === id);
+        async function incrementProgress(type, id) {
+            let list;
+            if (type.includes('hentai')) {
+                list = hentaiList;
+            } else {
+                switch(type) {
+                    case 'anime': list = animeList; break;
+                    case 'manga': list = mangaList; break;
+                    case 'film': list = filmList; break;
+                    default: list = animeList;
+                }
+            }
             
+            const item = list.find(i => i.id === id);
             if (item) {
                 item.progress = (item.progress || 0) + 1;
                 item.updatedAt = new Date().toISOString();
@@ -1580,25 +1949,25 @@
                 // Начисляем опыт за прогресс
                 addExperience(1);
                 
-                saveData();
+                await saveData();
                 renderLists();
-                
                 showNotification('Прогресс обновлен!');
             }
         }
 
-        function showAniListSearch() {
-            document.getElementById('anilist-search-modal').style.display = 'flex';
-            document.getElementById('anilist-search').focus();
+        function showSearchModal() {
+            document.getElementById('search-modal').style.display = 'flex';
+            document.getElementById('search-query').focus();
         }
 
-        function hideAniListSearch() {
-            document.getElementById('anilist-search-modal').style.display = 'none';
+        function hideSearchModal() {
+            document.getElementById('search-modal').style.display = 'none';
         }
 
-        async function performAniListSearch() {
-            const query = document.getElementById('anilist-search').value.trim();
-            const resultsContainer = document.getElementById('anilist-results');
+        async function performSearch() {
+            const query = document.getElementById('search-query').value.trim();
+            const searchType = document.getElementById('search-type').value;
+            const resultsContainer = document.getElementById('search-results');
             
             if (!query) {
                 resultsContainer.innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Введите запрос</div>';
@@ -1610,50 +1979,71 @@
             resultsContainer.style.display = 'block';
             
             try {
-                const searchType = currentType === 'anime' ? 'ANIME' : 'MANGA';
-                const anilistQuery = `
-                    query ($search: String, $type: MediaType) {
-                        Page(page: 1, perPage: 10) {
-                            media(search: $search, type: $type) {
-                                id
-                                title {
-                                    romaji
-                                    english
-                                    native
-                                }
-                                coverImage {
-                                    large
-                                }
-                                episodes
-                                chapters
-                                status
-                            }
-                        }
-                    }
-                `;
+                let results = [];
                 
-                const response = await fetch('https://graphql.anilist.co', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: anilistQuery,
-                        variables: { search: query, type: searchType }
-                    })
-                });
+                if (searchType === 'film') {
+                    // Поиск фильмов/сериалов через TMDB
+                    results = await searchTMDB(query);
+                } else {
+                    // Поиск аниме/манги через AniList
+                    results = await searchAniList(query, searchType === 'anime' ? 'ANIME' : 'MANGA');
+                }
                 
-                const data = await response.json();
-                displayAniListResults(data.data.Page.media);
+                displaySearchResults(results, searchType);
             } catch (error) {
-                console.error('AniList search error:', error);
+                console.error('Ошибка поиска:', error);
                 resultsContainer.innerHTML = '<div style="padding: 12px; text-align: center; color: #d32f2f;">Ошибка поиска</div>';
             }
         }
 
-        function displayAniListResults(results) {
-            const container = document.getElementById('anilist-results');
+        async function searchAniList(query, type) {
+            const anilistQuery = `
+                query ($search: String, $type: MediaType) {
+                    Page(page: 1, perPage: 10) {
+                        media(search: $search, type: $type) {
+                            id
+                            title {
+                                romaji
+                                english
+                                native
+                            }
+                            coverImage {
+                                large
+                            }
+                            episodes
+                            chapters
+                            status
+                        }
+                    }
+                }
+            `;
+            
+            const response = await fetch('https://graphql.anilist.co', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: anilistQuery,
+                    variables: { search: query, type: type }
+                })
+            });
+            
+            const data = await response.json();
+            return data.data.Page.media;
+        }
+
+        async function searchTMDB(query) {
+            // Заглушка для TMDB API
+            // Для реального использования нужен API ключ
+            return [
+                { title: query, type: 'film' }
+            ];
+        }
+
+        function displaySearchResults(results, searchType) {
+            const container = document.getElementById('search-results');
             
             if (!results || results.length === 0) {
                 container.innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Ничего не найдено</div>';
@@ -1661,37 +2051,145 @@
             }
             
             container.innerHTML = '';
-            results.forEach(media => {
-                const title = media.title.romaji || media.title.english || media.title.native;
-                const episodes = media.episodes || '?';
-                const chapters = media.chapters || '?';
+            results.forEach(result => {
+                const title = result.title?.romaji || result.title?.english || result.title?.native || result.title;
+                const episodes = result.episodes || '?';
+                const chapters = result.chapters || '?';
+                const cover = result.coverImage?.large || '';
                 
                 const item = document.createElement('div');
                 item.className = 'search-result-item';
                 item.innerHTML = `
                     <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
                     <div style="font-size: 11px; color: #888;">
-                        ${currentType === 'anime' ? `Эпизоды: ${episodes}` : `Главы: ${chapters}`}
+                        ${searchType === 'anime' ? `Эпизоды: ${episodes}` : 
+                          searchType === 'manga' ? `Главы: ${chapters}` :
+                          `Тип: ${searchType === 'film' ? 'Фильм/Сериал' : ''}`}
                     </div>
                 `;
-                item.onclick = () => selectAniListResult(media);
+                item.onclick = () => selectSearchResult(result, searchType);
                 container.appendChild(item);
             });
         }
 
-        function selectAniListResult(media) {
-            const title = media.title.romaji || media.title.english || media.title.native;
-            const cover = media.coverImage?.large;
-            const total = currentType === 'anime' ? media.episodes : media.chapters;
+        function selectSearchResult(result, searchType) {
+            const title = result.title?.romaji || result.title?.english || result.title?.native || result.title;
+            const cover = result.coverImage?.large || '';
+            const total = searchType === 'anime' ? result.episodes : 
+                         searchType === 'manga' ? result.chapters : '';
             
             document.getElementById('item-title').value = title;
             document.getElementById('item-cover').value = cover || '';
             document.getElementById('item-total').value = total || '';
             
-            hideAniListSearch();
-            document.getElementById('anilist-search').value = '';
-            document.getElementById('anilist-results').innerHTML = '';
-            document.getElementById('anilist-results').style.display = 'none';
+            // Устанавливаем тип контента
+            if (searchType === 'film') {
+                currentType = 'film';
+            } else if (searchType === 'manga') {
+                currentType = 'manga';
+            } else {
+                currentType = 'anime';
+            }
+            
+            hideSearchModal();
+            document.getElementById('search-query').value = '';
+            document.getElementById('search-results').innerHTML = '';
+            document.getElementById('search-results').style.display = 'none';
+        }
+
+        function showAddStatusForm() {
+            selectedStatusColor = '#8774e1';
+            document.getElementById('status-name').value = '';
+            
+            // Сбрасываем выбор цвета
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.style.backgroundColor === 'rgb(135, 116, 225)') {
+                    option.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('status-modal').style.display = 'flex';
+        }
+
+        function selectStatusColor(color) {
+            selectedStatusColor = color;
+            
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.style.backgroundColor === color) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        function hideStatusModal() {
+            document.getElementById('status-modal').style.display = 'none';
+        }
+
+        async function saveCustomStatus() {
+            const name = document.getElementById('status-name').value.trim();
+            
+            if (!name) {
+                alert('Введите название статуса');
+                return;
+            }
+            
+            if (!selectedStatusColor) {
+                alert('Выберите цвет статуса');
+                return;
+            }
+            
+            const status = {
+                id: 'custom_' + Date.now().toString(),
+                name: name,
+                color: selectedStatusColor,
+                createdAt: new Date().toISOString()
+            };
+            
+            customStatuses.push(status);
+            await saveData();
+            renderCustomStatusesList();
+            hideStatusModal();
+            
+            showNotification('Статус добавлен!');
+            
+            // Разблокируем достижение
+            checkAchievements();
+        }
+
+        function renderCustomStatusesList() {
+            const container = document.getElementById('custom-statuses-list');
+            container.innerHTML = '';
+            
+            if (customStatuses.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Нет пользовательских статусов</div>';
+                return;
+            }
+            
+            customStatuses.forEach((status, index) => {
+                const item = document.createElement('div');
+                item.className = 'custom-status-item';
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 16px; height: 16px; border-radius: 4px; background: ${status.color}"></div>
+                        <span style="font-weight: 600;">${status.name}</span>
+                    </div>
+                    <button class="action-btn" onclick="deleteCustomStatus(${index})" title="Удалить" style="background: #d32f2f;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function deleteCustomStatus(index) {
+            if (!confirm('Удалить статус?')) return;
+            
+            customStatuses.splice(index, 1);
+            await saveData();
+            renderCustomStatusesList();
+            showNotification('Статус удален!');
         }
 
         function changeAvatar() {
@@ -1704,11 +2202,9 @@
                 document.getElementById('user-avatar').innerHTML = `<img src="${avatar}" alt="Avatar">`;
             }
             
-            // Обновляем уровень и опыт
             const userData = JSON.parse(localStorage.getItem(`userData_${userId}`)) || { xp: 0, level: 1 };
             document.getElementById('user-level').textContent = `Уровень ${userData.level} • ${userData.xp} XP`;
             
-            // Обновляем имя пользователя из Telegram, если доступно
             const tgUser = tg.initDataUnsafe?.user;
             if (tgUser) {
                 document.getElementById('username').textContent = tgUser.first_name || 'Пользователь';
@@ -1719,7 +2215,6 @@
             const userData = JSON.parse(localStorage.getItem(`userData_${userId}`)) || { xp: 0, level: 1 };
             userData.xp += amount;
             
-            // Проверяем повышение уровня (каждые 100 XP)
             const newLevel = Math.floor(userData.xp / 100) + 1;
             if (newLevel > userData.level) {
                 userData.level = newLevel;
@@ -1756,7 +2251,6 @@
                 container.appendChild(item);
             });
             
-            // Проверяем и разблокируем достижения
             checkAchievements();
         }
 
@@ -1765,9 +2259,11 @@
             const unlocked = userData.unlockedAchievements || [];
             let newAchievements = [];
             
-            // Проверяем каждое достижение
-            if (animeList.length >= 1 && !unlocked.includes('first_anime')) {
-                unlocked.push('first_anime');
+            const allEntries = [...animeList, ...mangaList, ...filmList, ...hentaiList];
+            
+            // Проверяем достижения
+            if (allEntries.length >= 1 && !unlocked.includes('first_entry')) {
+                unlocked.push('first_entry');
                 newAchievements.push('Новичок');
             }
             if (animeList.length >= 10 && !unlocked.includes('anime_fan')) {
@@ -1778,67 +2274,52 @@
                 unlocked.push('manga_reader');
                 newAchievements.push('Читатель');
             }
+            if (filmList.length >= 5 && !unlocked.includes('film_buff')) {
+                unlocked.push('film_buff');
+                newAchievements.push('Киноман');
+            }
             
-            // Проверяем завершённые тайтлы
-            const completedCount = [...animeList, ...mangaList].filter(item => item.status === 'completed').length;
-            if (completedCount >= 5 && !unlocked.includes('completionist')) {
+            const completedCount = allEntries.filter(item => item.status === 'completed').length;
+            if (completedCount >= 10 && !unlocked.includes('completionist')) {
                 unlocked.push('completionist');
                 newAchievements.push('Завершитель');
             }
             
-            // Проверяем оценённые тайтлы
-            const ratedCount = [...animeList, ...mangaList].filter(item => item.rating > 0).length;
-            if (ratedCount >= 10 && !unlocked.includes('critic')) {
+            const ratedCount = allEntries.filter(item => item.rating > 0).length;
+            if (ratedCount >= 20 && !unlocked.includes('critic')) {
                 unlocked.push('critic');
                 newAchievements.push('Критик');
             }
             
-            // Проверяем просмотренные серии
             const totalEpisodes = animeList.reduce((sum, anime) => sum + (anime.progress || 0), 0);
-            if (totalEpisodes >= 100 && !unlocked.includes('binge_watcher')) {
+            if (totalEpisodes >= 200 && !unlocked.includes('binge_watcher')) {
                 unlocked.push('binge_watcher');
                 newAchievements.push('Запоем');
             }
             
-            // Проверяем использование трекера (30 дней)
-            const firstItem = [...animeList, ...mangaList].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
+            const firstItem = allEntries.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
             if (firstItem) {
                 const daysUsed = Math.floor((new Date() - new Date(firstItem.createdAt)) / (1000 * 60 * 60 * 24));
-                if (daysUsed >= 30 && !unlocked.includes('veteran')) {
+                if (daysUsed >= 60 && !unlocked.includes('veteran')) {
                     unlocked.push('veteran');
                     newAchievements.push('Ветеран');
                 }
             }
             
-            // Проверяем 5-звездочные оценки
-            const fiveStarCount = [...animeList, ...mangaList].filter(item => item.rating === 5).length;
-            if (fiveStarCount >= 10 && !unlocked.includes('perfectionist')) {
-                unlocked.push('perfectionist');
-                newAchievements.push('Перфекционист');
-            }
-            
-            // Проверяем все статусы
-            const hasAllStatuses = defaultStatuses.every(status => 
-                [...animeList, ...mangaList].some(item => item.status === status.id)
-            );
-            if (hasAllStatuses && !unlocked.includes('explorer')) {
-                unlocked.push('explorer');
-                newAchievements.push('Исследователь');
-            }
-            
-            // Проверяем общее количество тайтлов
-            const totalEntries = animeList.length + mangaList.length;
-            if (totalEntries >= 50 && !unlocked.includes('collector')) {
+            if (allEntries.length >= 100 && !unlocked.includes('collector')) {
                 unlocked.push('collector');
                 newAchievements.push('Коллекционер');
             }
             
-            // Сохраняем и показываем уведомления о новых достижениях
+            if (customStatuses.length >= 5 && !unlocked.includes('customizer')) {
+                unlocked.push('customizer');
+                newAchievements.push('Кастомайзер');
+            }
+            
             if (newAchievements.length > 0) {
                 userData.unlockedAchievements = unlocked;
                 localStorage.setItem(`userData_${userId}`, JSON.stringify(userData));
                 
-                // Начисляем XP за достижения
                 newAchievements.forEach(achievementName => {
                     const achievement = achievements.find(a => a.name === achievementName);
                     if (achievement) {
@@ -1855,22 +2336,25 @@
             const container = document.getElementById('recommendations-list');
             container.innerHTML = '';
             
-            if (animeList.length === 0 && mangaList.length === 0) {
+            const allEntries = [...animeList, ...mangaList, ...filmList];
+            if (allEntries.length === 0) {
                 container.innerHTML = '<div class="card" style="text-align: center; color: #888; padding: 40px;">Добавьте несколько тайтлов для получения рекомендаций</div>';
                 return;
             }
             
-            // Перемешиваем рекомендации для разнообразия
             const shuffledRecommendations = [...sampleRecommendations]
                 .sort(() => Math.random() - 0.5)
-                .slice(0, 6);
+                .slice(0, 8);
             
             shuffledRecommendations.forEach(rec => {
                 const item = document.createElement('div');
                 item.className = 'recommendation-item';
                 item.innerHTML = `
                     <div style="font-weight: 600; margin-bottom: 4px;">${rec.title}</div>
-                    <div style="font-size: 11px; color: #888; margin-bottom: 6px;">${rec.type === 'anime' ? 'Аниме' : 'Манга'}</div>
+                    <div style="font-size: 11px; color: #888; margin-bottom: 6px;">
+                        ${rec.type === 'anime' ? 'Аниме' : 
+                          rec.type === 'manga' ? 'Манга' : 'Фильм/Сериал'}
+                    </div>
                     <div style="font-size: 12px; color: #8774e1;">${rec.reason}</div>
                 `;
                 item.onclick = () => {
@@ -1887,7 +2371,6 @@
             updateThemeColors();
             saveSettings();
             
-            // Обновляем выбранный цвет в пикере
             document.querySelectorAll('.color-option').forEach(option => {
                 option.classList.remove('selected');
             });
@@ -1897,16 +2380,14 @@
         function updateThemeColors() {
             document.documentElement.style.setProperty('--theme-color', themeColor);
             
-            // Обновляем все элементы с основным цветом
             const elements = document.querySelectorAll('.tab.active, .btn, .progress-fill, .status-tab.active, .floating-btn, .achievement-icon:not(.achievement-locked)');
             elements.forEach(el => {
                 el.style.backgroundColor = themeColor;
                 el.style.borderColor = themeColor;
             });
             
-            // Обновляем цвет статус-баджей
             document.querySelectorAll('.status-badge').forEach(badge => {
-                if (badge.style.backgroundColor === 'rgb(135, 116, 225)') { // #8774e1
+                if (badge.style.backgroundColor === 'rgb(135, 116, 225)') {
                     badge.style.backgroundColor = themeColor;
                 }
             });
@@ -1934,28 +2415,19 @@
             // Основная статистика
             document.getElementById('total-anime').textContent = animeList.length;
             document.getElementById('total-manga').textContent = mangaList.length;
+            document.getElementById('total-films').textContent = filmList.length;
+            document.getElementById('total-hentai').textContent = hentaiList.length;
             
-            const totalEpisodes = animeList.reduce((sum, anime) => sum + (anime.progress || 0), 0);
-            const totalChapters = mangaList.reduce((sum, manga) => sum + (manga.progress || 0), 0);
-            
-            // Форматируем время просмотра (24 минуты на серию)
-            const totalWatchTime = totalEpisodes * 24;
-            document.getElementById('total-episodes-time').textContent = formatTime(totalWatchTime);
-            
-            // Отображаем главы
-            document.getElementById('total-chapters-time').textContent = `${totalChapters}гл`;
-            
-            // Статистика по статусам
-            const completedCount = [...animeList, ...mangaList].filter(item => item.status === 'completed').length;
-            const watchingCount = [...animeList, ...mangaList].filter(item => item.status === 'watching').length;
-            const plannedCount = [...animeList, ...mangaList].filter(item => item.status === 'planned').length;
+            const allEntries = [...animeList, ...mangaList, ...filmList, ...hentaiList];
+            const completedCount = allEntries.filter(item => item.status === 'completed').length;
+            const watchingCount = allEntries.filter(item => item.status === 'watching').length;
+            const plannedCount = allEntries.filter(item => item.status === 'planned').length;
             
             document.getElementById('completed-count').textContent = completedCount;
             document.getElementById('watching-count').textContent = watchingCount;
             document.getElementById('planned-count').textContent = plannedCount;
             
-            // Средний рейтинг
-            const ratedItems = [...animeList, ...mangaList].filter(item => item.rating > 0);
+            const ratedItems = allEntries.filter(item => item.rating > 0);
             const averageRating = ratedItems.length > 0 
                 ? (ratedItems.reduce((sum, item) => sum + item.rating, 0) / ratedItems.length).toFixed(1)
                 : 0;
@@ -1963,30 +2435,100 @@
             document.getElementById('average-rating').textContent = averageRating;
             
             // Дополнительная статистика
-            const firstItem = [...animeList, ...mangaList].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
+            const firstItem = allEntries.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
             const daysInTracker = firstItem ? Math.floor((new Date() - new Date(firstItem.createdAt)) / (1000 * 60 * 60 * 24)) : 0;
             document.getElementById('total-days').textContent = daysInTracker;
             
-            // Любимый тип контента
-            const favoriteType = animeList.length >= mangaList.length ? 'Аниме' : 'Манга';
+            const animeCount = animeList.length + hentaiList.filter(item => item.type === 'hentai-anime').length;
+            const mangaCount = mangaList.length + hentaiList.filter(item => item.type === 'hentai-manga').length;
+            const filmCount = filmList.length;
+            
+            let favoriteType = '-';
+            if (animeCount > mangaCount && animeCount > filmCount) favoriteType = 'Аниме';
+            else if (mangaCount > animeCount && mangaCount > filmCount) favoriteType = 'Манга';
+            else if (filmCount > animeCount && filmCount > mangaCount) favoriteType = 'Фильмы';
+            
             document.getElementById('favorite-type').textContent = favoriteType;
             
-            // Общее количество записей
-            const totalEntries = animeList.length + mangaList.length;
-            document.getElementById('total-entries').textContent = totalEntries;
-            
-            // Количество оцененных тайтлов
+            document.getElementById('total-entries').textContent = allEntries.length;
             document.getElementById('rated-count').textContent = ratedItems.length;
         }
 
+        function updateSyncStatus() {
+            const indicator = document.getElementById('sync-indicator');
+            const text = document.getElementById('sync-text');
+            const cloudStatus = document.getElementById('cloud-status');
+            
+            if (cloudStorage && isOnline) {
+                indicator.className = 'sync-indicator';
+                text.textContent = 'Синхронизировано с облаком';
+                cloudStatus.textContent = 'Облако: подключено';
+            } else if (!isOnline) {
+                indicator.className = 'sync-indicator offline';
+                text.textContent = 'Оффлайн режим';
+                cloudStatus.textContent = 'Облако: оффлайн';
+            } else {
+                indicator.className = 'sync-indicator offline';
+                text.textContent = 'Локальное хранилище';
+                cloudStatus.textContent = 'Облако: недоступно';
+            }
+        }
+
+        async function forceSync() {
+            if (!cloudStorage || !isOnline) {
+                showNotification('Облачное хранилище недоступно');
+                return;
+            }
+            
+            const indicator = document.getElementById('sync-indicator');
+            const text = document.getElementById('sync-text');
+            
+            indicator.className = 'sync-indicator syncing';
+            text.textContent = 'Синхронизация...';
+            
+            try {
+                await saveToCloud();
+                indicator.className = 'sync-indicator';
+                text.textContent = 'Синхронизировано';
+                showNotification('Данные синхронизированы с облаком!');
+            } catch (error) {
+                indicator.className = 'sync-indicator offline';
+                text.textContent = 'Ошибка синхронизации';
+                showNotification('Ошибка синхронизации');
+            }
+        }
+
         function updateStorageInfo() {
-            const totalSize = JSON.stringify(localStorage).length;
+            const data = {
+                animeList, mangaList, filmList, hentaiList, customStatuses,
+                settings: {
+                    lightTheme: document.body.classList.contains('light-theme'),
+                    autoBackup: document.getElementById('backup-toggle').checked,
+                    autoSync: document.getElementById('sync-toggle').checked,
+                    themeColor: themeColor
+                }
+            };
+            
+            const totalSize = JSON.stringify(data).length;
             const infoElement = document.getElementById('storage-info');
             infoElement.textContent = `Использовано: ${(totalSize / 1024).toFixed(1)} KB`;
         }
 
+        function saveSettings() {
+            const settings = {
+                lightTheme: document.body.classList.contains('light-theme'),
+                autoBackup: document.getElementById('backup-toggle').checked,
+                autoSync: document.getElementById('sync-toggle').checked,
+                themeColor: themeColor
+            };
+            localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
+            
+            if (cloudStorage && document.getElementById('sync-toggle').checked) {
+                saveToCloud();
+            }
+        }
+
         function showNotification(message) {
-            // Простое уведомление
             alert(message);
         }
 
@@ -1994,9 +2536,12 @@
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
+                filmList: filmList,
+                hentaiList: hentaiList,
                 customStatuses: customStatuses,
                 userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
-                exportDate: new Date().toISOString()
+                exportDate: new Date().toISOString(),
+                version: APP_VERSION
             };
             
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2016,27 +2561,30 @@
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = '.json';
-            input.onchange = function(e) {
+            input.onchange = async function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
                         
                         if (confirm('Заменить текущие данные?')) {
                             animeList = data.animeList || [];
                             mangaList = data.mangaList || [];
+                            filmList = data.filmList || [];
+                            hentaiList = data.hentaiList || [];
                             customStatuses = data.customStatuses || [];
                             
                             if (data.userData) {
                                 localStorage.setItem(`userData_${userId}`, JSON.stringify(data.userData));
                             }
                             
-                            saveData();
+                            await saveData();
+                            renderCategoryTabs();
                             renderLists();
-                            renderStatusTabs();
+                            renderCustomStatusesList();
                             updateStats();
                             updateAchievements();
                             updateProfile();
@@ -2051,14 +2599,12 @@
             input.click();
         }
 
-        function clearCache() {
+        async function clearCache() {
             if (confirm('Очистить кэш? Это не удалит ваши данные.')) {
-                // Очищаем только временные данные
                 const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
                 const avatar = localStorage.getItem(`avatar_${userId}`);
                 const userData = localStorage.getItem(`userData_${userId}`);
                 
-                // Сохраняем только важные данные
                 localStorage.clear();
                 
                 if (settings) localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
@@ -2066,7 +2612,7 @@
                 if (userData) localStorage.setItem(`userData_${userId}`, userData);
                 
                 localStorage.setItem('app_version', APP_VERSION);
-                loadData();
+                await loadData();
                 showNotification('Кэш очищен!');
             }
         }
@@ -2076,6 +2622,7 @@
                 document.getElementById('theme-toggle').checked = true;
                 document.body.classList.remove('light-theme');
                 document.getElementById('backup-toggle').checked = true;
+                document.getElementById('sync-toggle').checked = true;
                 themeColor = '#8774e1';
                 updateThemeColors();
                 saveSettings();
@@ -2083,9 +2630,8 @@
             }
         }
 
-        function clearAllData() {
+        async function clearAllData() {
             if (confirm('ВНИМАНИЕ! Это удалит ВСЕ ваши данные. Продолжить?')) {
-                // Удаляем только данные текущего пользователя
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
@@ -2096,9 +2642,25 @@
                 
                 keysToRemove.forEach(key => localStorage.removeItem(key));
                 
-                loadData();
+                if (cloudStorage) {
+                    try {
+                        await new Promise((resolve) => {
+                            cloudStorage.removeItem(`animeList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`mangaList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`filmList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`hentaiList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`customStatuses_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`settings_${userId}`, () => resolve());
+                        });
+                    } catch (error) {
+                        console.log('Ошибка очистки облака:', error);
+                    }
+                }
+                
+                await loadData();
+                renderCategoryTabs();
                 renderLists();
-                renderStatusTabs();
+                renderCustomStatusesList();
                 updateStats();
                 updateAchievements();
                 updateProfile();
@@ -2109,8 +2671,9 @@
         // Инициализация при загрузке
         setTimeout(() => {
             updateThemeColors();
+            renderCustomStatusesList();
             generateRecommendations();
         }, 100);
     </script>
 </body>
-                            </html>
+</html>
