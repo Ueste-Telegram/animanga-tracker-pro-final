@@ -933,12 +933,12 @@
                         <div class="stat-label">Манга</div>
                     </div>
                     <div class="stat-card">
-                        <div class="time-display" id="total-films">0</div>
-                        <div class="time-label">Фильмы/Сериалы</div>
+                        <div class="time-display" id="total-movies">0</div>
+                        <div class="time-label">Фильмы</div>
                     </div>
                     <div class="stat-card">
-                        <div class="time-display" id="total-hentai">0</div>
-                        <div class="time-label">18+ Контент</div>
+                        <div class="time-display" id="total-series">0</div>
+                        <div class="time-label">Сериалы</div>
                     </div>
                 </div>
                 
@@ -1053,6 +1053,14 @@
                     </label>
                 </div>
                 
+                <div style="margin: 16px 0;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">API ключ TMDB</div>
+                    <input type="text" id="tmdb-api-key" class="form-control" placeholder="Введите ваш TMDB API ключ">
+                    <p style="font-size: 11px; color: #888; margin-top: 4px;">
+                        Получите ключ на <a href="https://www.themoviedb.org/" style="color: #8774e1;" target="_blank">themoviedb.org</a>
+                    </p>
+                </div>
+                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
                     <button class="btn" onclick="exportData()">
                         <i class="fas fa-download"></i> Экспорт
@@ -1080,9 +1088,10 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 3.0.0<br>
+                    Версия 3.1.0<br>
                     <span id="storage-info">Загрузка...</span><br>
-                    <span id="cloud-status">Облако: проверка...</span>
+                    <span id="cloud-status">Облако: проверка...</span><br>
+                    <span id="platform-info"></span>
                 </div>
             </div>
         </div>
@@ -1151,7 +1160,8 @@
                 <select id="search-type" class="form-control" style="flex: 1;">
                     <option value="anime">Аниме (AniList)</option>
                     <option value="manga">Манга (AniList)</option>
-                    <option value="film">Фильмы/Сериалы (TMDB)</option>
+                    <option value="movie">Фильмы (TMDB)</option>
+                    <option value="tv">Сериалы (TMDB)</option>
                 </select>
             </div>
             
@@ -1195,15 +1205,114 @@
 
     <script>
         // Константа версии
-        const APP_VERSION = '3.0.0';
+        const APP_VERSION = '3.1.0';
         
-        // Инициализация Telegram Web App
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+        // Инициализация Telegram Web App с проверкой на ПК-версию
+        let tg = null;
+        let userId = 'default';
+        let platform = 'browser';
+        let isTelegramWebApp = false;
         
-        // Получаем ID пользователя
-        const userId = tg.initDataUnsafe?.user?.id || 'default';
+        // Проверяем доступность Telegram Web App
+        function checkTelegramEnvironment() {
+            console.log("=== ПРОВЕРКА СРЕДЫ TELEGRAM ===");
+            console.log("Telegram доступен:", typeof window.Telegram !== 'undefined');
+            
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                try {
+                    tg = window.Telegram.WebApp;
+                    isTelegramWebApp = true;
+                    
+                    // Расширяем окно и включаем подтверждение закрытия
+                    tg.expand();
+                    tg.enableClosingConfirmation();
+                    
+                    // Получаем платформу
+                    platform = tg.platform || navigator.platform.toLowerCase();
+                    console.log("Платформа Telegram:", platform);
+                    
+                    // Получаем ID пользователя
+                    if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                        userId = tg.initDataUnsafe.user.id.toString();
+                        console.log("ID пользователя Telegram:", userId);
+                    } else {
+                        userId = 'default_telegram';
+                        console.log("ID пользователя не найден, используем дефолтный");
+                    }
+                    
+                    // Показываем информацию о платформе
+                    document.getElementById('platform-info').textContent = `Платформа: ${platform}`;
+                    
+                    return true;
+                } catch (error) {
+                    console.error("Ошибка инициализации Telegram WebApp:", error);
+                    return initializeFallbackMode();
+                }
+            } else {
+                console.log("Telegram WebApp не обнаружен, используем fallback режим");
+                return initializeFallbackMode();
+            }
+        }
+        
+        // Fallback режим для браузера/ПК версии
+        function initializeFallbackMode() {
+            console.log("Инициализация fallback режима для браузера/ПК");
+            
+            // Определяем платформу
+            const userAgent = navigator.userAgent.toLowerCase();
+            if (userAgent.includes('windows')) platform = 'windows';
+            else if (userAgent.includes('mac')) platform = 'macos';
+            else if (userAgent.includes('linux')) platform = 'linux';
+            else platform = 'browser';
+            
+            // Эмулируем Telegram API для работы в браузере
+            window.Telegram = {
+                WebApp: {
+                    initData: "{}",
+                    initDataUnsafe: {
+                        user: {
+                            id: 0,
+                            first_name: "Локальный пользователь",
+                            username: "local_user"
+                        }
+                    },
+                    platform: platform,
+                    version: "1.0",
+                    ready: () => console.log("WebApp готов"),
+                    expand: () => console.log("WebApp расширен"),
+                    enableClosingConfirmation: () => console.log("Подтверждение закрытия включено"),
+                    showPopup: (params) => alert(params.message),
+                    showAlert: (msg) => alert(msg),
+                    CloudStorage: {
+                        setItem: (key, value, cb) => {
+                            localStorage.setItem(key, value);
+                            if (cb) cb(true);
+                        },
+                        getItem: (key, cb) => {
+                            const value = localStorage.getItem(key);
+                            if (cb) cb(value);
+                        },
+                        removeItem: (key, cb) => {
+                            localStorage.removeItem(key);
+                            if (cb) cb(true);
+                        }
+                    }
+                }
+            };
+            
+            tg = window.Telegram.WebApp;
+            userId = 'local_user_' + Date.now();
+            
+            // Показываем информацию о платформе
+            document.getElementById('platform-info').textContent = `Платформа: ${platform} (Локальный режим)`;
+            
+            // Показываем уведомление о локальном режиме
+            setTimeout(() => {
+                showNotification("Работаем в локальном режиме. Данные сохраняются в браузере.");
+            }, 1000);
+            
+            return false;
+        }
         
         // Глобальные переменные
         let currentTab = 'main';
@@ -1213,11 +1322,13 @@
         let selectedRating = 0;
         let isAdultContent = false;
         let selectedStatusColor = '#8774e1';
+        let tmdbApiKey = '';
         
         // Данные
         let animeList = [];
         let mangaList = [];
-        let filmList = [];
+        let moviesList = [];
+        let seriesList = [];
         let hentaiList = [];
         let customStatuses = [];
         let currentStatusFilter = 'all';
@@ -1229,7 +1340,8 @@
         const categories = [
             { id: 'anime', name: 'Аниме', icon: '🎬', color: '#8774e1' },
             { id: 'manga', name: 'Манга', icon: '📚', color: '#4caf50' },
-            { id: 'film', name: 'Фильмы/Сериалы', icon: '🎥', color: '#ff9800' },
+            { id: 'movies', name: 'Фильмы', icon: '🎥', color: '#ff9800' },
+            { id: 'series', name: 'Сериалы', icon: '📺', color: '#2196f3' },
             { id: 'hentai-anime', name: 'Хентай Аниме', icon: '🔞', color: '#d32f2f', adult: true },
             { id: 'hentai-manga', name: 'Хентай Манга', icon: '🔞', color: '#d32f2f', adult: true }
         ];
@@ -1249,7 +1361,8 @@
             { id: 'first_entry', name: 'Новичок', description: 'Добавьте первую запись', icon: '🎬', xp: 10 },
             { id: 'anime_fan', name: 'Фанат аниме', description: 'Добавьте 10 аниме', icon: '📺', xp: 50 },
             { id: 'manga_reader', name: 'Читатель', description: 'Добавьте 5 манги', icon: '📚', xp: 30 },
-            { id: 'film_buff', name: 'Киноман', description: 'Добавьте 5 фильмов/сериалов', icon: '🎥', xp: 40 },
+            { id: 'film_buff', name: 'Киноман', description: 'Добавьте 5 фильмов', icon: '🎥', xp: 40 },
+            { id: 'series_lover', name: 'Сериаломан', description: 'Добавьте 3 сериала', icon: '📺', xp: 30 },
             { id: 'completionist', name: 'Завершитель', description: 'Завершите 10 тайтлов', icon: '🏆', xp: 100 },
             { id: 'critic', name: 'Критик', description: 'Оцените 20 тайтлов', icon: '⭐', xp: 80 },
             { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 200 серий', icon: '🍿', xp: 120 },
@@ -1265,8 +1378,8 @@
             { title: 'Demon Slayer', type: 'anime', reason: 'Высокий рейтинг, подходит под ваши предпочтения' },
             { title: 'Tokyo Revengers', type: 'anime', reason: 'На основе ваших драматических тайтлов' },
             { title: 'Chainsaw Man', type: 'manga', reason: 'Новый хит, соответствует вашему стилю' },
-            { title: 'Interstellar', type: 'film', reason: 'Фильм высокого рейтинга в жанре фантастики' },
-            { title: 'Breaking Bad', type: 'film', reason: 'Культовый сериал в жанре драмы' },
+            { title: 'Interstellar', type: 'movies', reason: 'Фильм высокого рейтинга в жанре фантастики' },
+            { title: 'Breaking Bad', type: 'series', reason: 'Культовый сериал в жанре драмы' },
             { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' }
         ];
 
@@ -1277,6 +1390,9 @@
 
         async function initializeApp() {
             try {
+                // Проверяем среду Telegram
+                checkTelegramEnvironment();
+                
                 // Проверяем версию
                 if (localStorage.getItem('app_version') !== APP_VERSION) {
                     localStorage.setItem('app_version', APP_VERSION);
@@ -1310,13 +1426,13 @@
 
         async function initCloudStorage() {
             // Проверяем доступность облачного хранилища Telegram
-            if (tg && tg.CloudStorage) {
+            if (isTelegramWebApp && tg && tg.CloudStorage) {
                 try {
                     cloudStorage = tg.CloudStorage;
                     isOnline = true;
-                    console.log('Облачное хранилище доступно');
+                    console.log('Облачное хранилище Telegram доступно');
                 } catch (error) {
-                    console.log('Облачное хранилище недоступно:', error);
+                    console.log('Облачное хранилище Telegram недоступно:', error);
                     cloudStorage = null;
                     isOnline = false;
                 }
@@ -1327,6 +1443,12 @@
         }
 
         async function loadData() {
+            // Загружаем TMDB API ключ
+            tmdbApiKey = localStorage.getItem(`tmdb_api_key_${userId}`) || '';
+            if (tmdbApiKey) {
+                document.getElementById('tmdb-api-key').value = tmdbApiKey;
+            }
+            
             // Пытаемся загрузить из облачного хранилища
             if (cloudStorage && document.getElementById('sync-toggle').checked) {
                 try {
@@ -1345,7 +1467,7 @@
         }
 
         async function loadFromCloud() {
-            const keys = ['animeList', 'mangaList', 'filmList', 'hentaiList', 'customStatuses', 'settings', 'userData'];
+            const keys = ['animeList', 'mangaList', 'moviesList', 'seriesList', 'hentaiList', 'customStatuses', 'settings', 'userData'];
             const data = {};
             
             for (const key of keys) {
@@ -1372,7 +1494,8 @@
         function loadFromLocal() {
             animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
             mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
-            filmList = JSON.parse(localStorage.getItem(`filmList_${userId}`)) || [];
+            moviesList = JSON.parse(localStorage.getItem(`moviesList_${userId}`)) || [];
+            seriesList = JSON.parse(localStorage.getItem(`seriesList_${userId}`)) || [];
             hentaiList = JSON.parse(localStorage.getItem(`hentaiList_${userId}`)) || [];
             customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
             
@@ -1389,7 +1512,8 @@
         function loadFromObject(data) {
             animeList = data.animeList || [];
             mangaList = data.mangaList || [];
-            filmList = data.filmList || [];
+            moviesList = data.moviesList || [];
+            seriesList = data.seriesList || [];
             hentaiList = data.hentaiList || [];
             customStatuses = data.customStatuses || [];
             
@@ -1407,6 +1531,13 @@
         }
 
         async function saveData() {
+            // Сохраняем TMDB API ключ
+            const newTmdbKey = document.getElementById('tmdb-api-key').value.trim();
+            if (newTmdbKey && newTmdbKey !== tmdbApiKey) {
+                tmdbApiKey = newTmdbKey;
+                localStorage.setItem(`tmdb_api_key_${userId}`, tmdbApiKey);
+            }
+            
             // Сохраняем в localStorage
             saveToLocal();
             
@@ -1426,7 +1557,8 @@
         function saveToLocal() {
             localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
             localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
-            localStorage.setItem(`filmList_${userId}`, JSON.stringify(filmList));
+            localStorage.setItem(`moviesList_${userId}`, JSON.stringify(moviesList));
+            localStorage.setItem(`seriesList_${userId}`, JSON.stringify(seriesList));
             localStorage.setItem(`hentaiList_${userId}`, JSON.stringify(hentaiList));
             localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
             
@@ -1445,7 +1577,8 @@
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
-                filmList: filmList,
+                moviesList: moviesList,
+                seriesList: seriesList,
                 hentaiList: hentaiList,
                 customStatuses: customStatuses,
                 settings: {
@@ -1503,6 +1636,13 @@
             // Настройки
             document.getElementById('backup-toggle').addEventListener('change', saveSettings);
             document.getElementById('sync-toggle').addEventListener('change', saveSettings);
+            
+            // Сохранение TMDB API ключа при изменении
+            document.getElementById('tmdb-api-key').addEventListener('change', function() {
+                tmdbApiKey = this.value.trim();
+                localStorage.setItem(`tmdb_api_key_${userId}`, tmdbApiKey);
+                showNotification('TMDB API ключ сохранён');
+            });
 
             // Переключение вкладок
             document.querySelectorAll('.tab').forEach(tab => {
@@ -1623,8 +1763,11 @@
                 case 'manga':
                     list = mangaList;
                     break;
-                case 'film':
-                    list = filmList;
+                case 'movies':
+                    list = moviesList;
+                    break;
+                case 'series':
+                    list = seriesList;
                     break;
                 case 'hentai-anime':
                     list = hentaiList.filter(item => item.type === 'hentai-anime');
@@ -1820,7 +1963,8 @@
                 switch(currentType) {
                     case 'anime': list = animeList; break;
                     case 'manga': list = mangaList; break;
-                    case 'film': list = filmList; break;
+                    case 'movies': list = moviesList; break;
+                    case 'series': list = seriesList; break;
                     default: list = animeList;
                 }
             }
@@ -1854,7 +1998,8 @@
                 switch(type) {
                     case 'anime': list = animeList; break;
                     case 'manga': list = mangaList; break;
-                    case 'film': list = filmList; break;
+                    case 'movies': list = moviesList; break;
+                    case 'series': list = seriesList; break;
                     default: list = animeList;
                 }
             }
@@ -1914,7 +2059,8 @@
                 switch(type) {
                     case 'anime': list = animeList; break;
                     case 'manga': list = mangaList; break;
-                    case 'film': list = filmList; break;
+                    case 'movies': list = moviesList; break;
+                    case 'series': list = seriesList; break;
                     default: list = animeList;
                 }
             }
@@ -1936,7 +2082,8 @@
                 switch(type) {
                     case 'anime': list = animeList; break;
                     case 'manga': list = mangaList; break;
-                    case 'film': list = filmList; break;
+                    case 'movies': list = moviesList; break;
+                    case 'series': list = seriesList; break;
                     default: list = animeList;
                 }
             }
@@ -1981,9 +2128,9 @@
             try {
                 let results = [];
                 
-                if (searchType === 'film') {
+                if (searchType === 'movie' || searchType === 'tv') {
                     // Поиск фильмов/сериалов через TMDB
-                    results = await searchTMDB(query);
+                    results = await searchTMDB(query, searchType);
                 } else {
                     // Поиск аниме/манги через AniList
                     results = await searchAniList(query, searchType === 'anime' ? 'ANIME' : 'MANGA');
@@ -2034,12 +2181,31 @@
             return data.data.Page.media;
         }
 
-        async function searchTMDB(query) {
-            // Заглушка для TMDB API
-            // Для реального использования нужен API ключ
-            return [
-                { title: query, type: 'film' }
-            ];
+        async function searchTMDB(query, type) {
+            if (!tmdbApiKey) {
+                showNotification('Для поиска фильмов/сериалов нужен TMDB API ключ. Добавьте его в настройках.');
+                return [];
+            }
+            
+            try {
+                const url = `https://api.themoviedb.org/3/search/${type}?api_key=${tmdbApiKey}&language=ru-RU&query=${encodeURIComponent(query)}&page=1`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                return data.results.map(item => ({
+                    id: item.id,
+                    title: item.title || item.name,
+                    overview: item.overview,
+                    release_date: item.release_date || item.first_air_date,
+                    poster_path: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '',
+                    type: type,
+                    vote_average: item.vote_average
+                }));
+            } catch (error) {
+                console.error('Ошибка поиска TMDB:', error);
+                showNotification('Ошибка поиска. Проверьте API ключ.');
+                return [];
+            }
         }
 
         function displaySearchResults(results, searchType) {
@@ -2052,19 +2218,22 @@
             
             container.innerHTML = '';
             results.forEach(result => {
-                const title = result.title?.romaji || result.title?.english || result.title?.native || result.title;
+                const title = result.title?.romaji || result.title?.english || result.title?.native || result.title || result.name;
                 const episodes = result.episodes || '?';
                 const chapters = result.chapters || '?';
-                const cover = result.coverImage?.large || '';
+                const cover = result.coverImage?.large || result.poster_path || '';
+                const year = result.release_date ? result.release_date.substring(0, 4) : '';
                 
                 const item = document.createElement('div');
                 item.className = 'search-result-item';
                 item.innerHTML = `
-                    <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">${title} ${year ? `(${year})` : ''}</div>
                     <div style="font-size: 11px; color: #888;">
                         ${searchType === 'anime' ? `Эпизоды: ${episodes}` : 
                           searchType === 'manga' ? `Главы: ${chapters}` :
-                          `Тип: ${searchType === 'film' ? 'Фильм/Сериал' : ''}`}
+                          searchType === 'movie' ? 'Фильм' :
+                          searchType === 'tv' ? 'Сериал' : ''}
+                        ${result.vote_average ? ` • ★ ${result.vote_average.toFixed(1)}` : ''}
                     </div>
                 `;
                 item.onclick = () => selectSearchResult(result, searchType);
@@ -2073,18 +2242,23 @@
         }
 
         function selectSearchResult(result, searchType) {
-            const title = result.title?.romaji || result.title?.english || result.title?.native || result.title;
-            const cover = result.coverImage?.large || '';
-            const total = searchType === 'anime' ? result.episodes : 
-                         searchType === 'manga' ? result.chapters : '';
+            const title = result.title?.romaji || result.title?.english || result.title?.native || result.title || result.name;
+            const cover = result.coverImage?.large || result.poster_path || '';
             
             document.getElementById('item-title').value = title;
             document.getElementById('item-cover').value = cover || '';
-            document.getElementById('item-total').value = total || '';
+            
+            if (searchType === 'anime' || searchType === 'movie' || searchType === 'tv') {
+                document.getElementById('item-total').value = result.episodes || '';
+            } else if (searchType === 'manga') {
+                document.getElementById('item-total').value = result.chapters || '';
+            }
             
             // Устанавливаем тип контента
-            if (searchType === 'film') {
-                currentType = 'film';
+            if (searchType === 'movie') {
+                currentType = 'movies';
+            } else if (searchType === 'tv') {
+                currentType = 'series';
             } else if (searchType === 'manga') {
                 currentType = 'manga';
             } else {
@@ -2259,7 +2433,7 @@
             const unlocked = userData.unlockedAchievements || [];
             let newAchievements = [];
             
-            const allEntries = [...animeList, ...mangaList, ...filmList, ...hentaiList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList, ...hentaiList];
             
             // Проверяем достижения
             if (allEntries.length >= 1 && !unlocked.includes('first_entry')) {
@@ -2274,9 +2448,13 @@
                 unlocked.push('manga_reader');
                 newAchievements.push('Читатель');
             }
-            if (filmList.length >= 5 && !unlocked.includes('film_buff')) {
+            if (moviesList.length >= 5 && !unlocked.includes('film_buff')) {
                 unlocked.push('film_buff');
                 newAchievements.push('Киноман');
+            }
+            if (seriesList.length >= 3 && !unlocked.includes('series_lover')) {
+                unlocked.push('series_lover');
+                newAchievements.push('Сериаломан');
             }
             
             const completedCount = allEntries.filter(item => item.status === 'completed').length;
@@ -2336,7 +2514,7 @@
             const container = document.getElementById('recommendations-list');
             container.innerHTML = '';
             
-            const allEntries = [...animeList, ...mangaList, ...filmList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
             if (allEntries.length === 0) {
                 container.innerHTML = '<div class="card" style="text-align: center; color: #888; padding: 40px;">Добавьте несколько тайтлов для получения рекомендаций</div>';
                 return;
@@ -2353,7 +2531,8 @@
                     <div style="font-weight: 600; margin-bottom: 4px;">${rec.title}</div>
                     <div style="font-size: 11px; color: #888; margin-bottom: 6px;">
                         ${rec.type === 'anime' ? 'Аниме' : 
-                          rec.type === 'manga' ? 'Манга' : 'Фильм/Сериал'}
+                          rec.type === 'manga' ? 'Манга' : 
+                          rec.type === 'movies' ? 'Фильм' : 'Сериал'}
                     </div>
                     <div style="font-size: 12px; color: #8774e1;">${rec.reason}</div>
                 `;
@@ -2415,10 +2594,14 @@
             // Основная статистика
             document.getElementById('total-anime').textContent = animeList.length;
             document.getElementById('total-manga').textContent = mangaList.length;
-            document.getElementById('total-films').textContent = filmList.length;
-            document.getElementById('total-hentai').textContent = hentaiList.length;
+            document.getElementById('total-movies').textContent = moviesList.length;
+            document.getElementById('total-series').textContent = seriesList.length;
             
-            const allEntries = [...animeList, ...mangaList, ...filmList, ...hentaiList];
+            const hentaiAnimeCount = hentaiList.filter(item => item.type === 'hentai-anime').length;
+            const hentaiMangaCount = hentaiList.filter(item => item.type === 'hentai-manga').length;
+            const totalHentai = hentaiAnimeCount + hentaiMangaCount;
+            
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList, ...hentaiList];
             const completedCount = allEntries.filter(item => item.status === 'completed').length;
             const watchingCount = allEntries.filter(item => item.status === 'watching').length;
             const plannedCount = allEntries.filter(item => item.status === 'planned').length;
@@ -2439,14 +2622,23 @@
             const daysInTracker = firstItem ? Math.floor((new Date() - new Date(firstItem.createdAt)) / (1000 * 60 * 60 * 24)) : 0;
             document.getElementById('total-days').textContent = daysInTracker;
             
-            const animeCount = animeList.length + hentaiList.filter(item => item.type === 'hentai-anime').length;
-            const mangaCount = mangaList.length + hentaiList.filter(item => item.type === 'hentai-manga').length;
-            const filmCount = filmList.length;
+            const animeCount = animeList.length + hentaiAnimeCount;
+            const mangaCount = mangaList.length + hentaiMangaCount;
+            const moviesCount = moviesList.length;
+            const seriesCount = seriesList.length;
             
             let favoriteType = '-';
-            if (animeCount > mangaCount && animeCount > filmCount) favoriteType = 'Аниме';
-            else if (mangaCount > animeCount && mangaCount > filmCount) favoriteType = 'Манга';
-            else if (filmCount > animeCount && filmCount > mangaCount) favoriteType = 'Фильмы';
+            const counts = [
+                {type: 'Аниме', count: animeCount},
+                {type: 'Манга', count: mangaCount},
+                {type: 'Фильмы', count: moviesCount},
+                {type: 'Сериалы', count: seriesCount}
+            ];
+            
+            counts.sort((a, b) => b.count - a.count);
+            if (counts[0].count > 0) {
+                favoriteType = counts[0].type;
+            }
             
             document.getElementById('favorite-type').textContent = favoriteType;
             
@@ -2500,7 +2692,7 @@
 
         function updateStorageInfo() {
             const data = {
-                animeList, mangaList, filmList, hentaiList, customStatuses,
+                animeList, mangaList, moviesList, seriesList, hentaiList, customStatuses,
                 settings: {
                     lightTheme: document.body.classList.contains('light-theme'),
                     autoBackup: document.getElementById('backup-toggle').checked,
@@ -2529,14 +2721,19 @@
         }
 
         function showNotification(message) {
-            alert(message);
+            if (isTelegramWebApp && tg && tg.showPopup) {
+                tg.showPopup({title: "AniManga Tracker", message: message});
+            } else {
+                alert(message);
+            }
         }
 
         function exportData() {
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
-                filmList: filmList,
+                moviesList: moviesList,
+                seriesList: seriesList,
                 hentaiList: hentaiList,
                 customStatuses: customStatuses,
                 userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
@@ -2573,7 +2770,8 @@
                         if (confirm('Заменить текущие данные?')) {
                             animeList = data.animeList || [];
                             mangaList = data.mangaList || [];
-                            filmList = data.filmList || [];
+                            moviesList = data.moviesList || [];
+                            seriesList = data.seriesList || [];
                             hentaiList = data.hentaiList || [];
                             customStatuses = data.customStatuses || [];
                             
@@ -2604,12 +2802,14 @@
                 const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
                 const avatar = localStorage.getItem(`avatar_${userId}`);
                 const userData = localStorage.getItem(`userData_${userId}`);
+                const tmdbKey = localStorage.getItem(`tmdb_api_key_${userId}`);
                 
                 localStorage.clear();
                 
                 if (settings) localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
                 if (avatar) localStorage.setItem(`avatar_${userId}`, avatar);
                 if (userData) localStorage.setItem(`userData_${userId}`, userData);
+                if (tmdbKey) localStorage.setItem(`tmdb_api_key_${userId}`, tmdbKey);
                 
                 localStorage.setItem('app_version', APP_VERSION);
                 await loadData();
@@ -2647,7 +2847,8 @@
                         await new Promise((resolve) => {
                             cloudStorage.removeItem(`animeList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`mangaList_${userId}`, () => resolve());
-                            cloudStorage.removeItem(`filmList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`moviesList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`seriesList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`hentaiList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`customStatuses_${userId}`, () => resolve());
                             cloudStorage.removeItem(`settings_${userId}`, () => resolve());
