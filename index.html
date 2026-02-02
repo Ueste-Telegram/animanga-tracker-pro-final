@@ -456,28 +456,6 @@
             transform: scale(0.95);
         }
 
-        .anilist-search-btn {
-            background: #02a9ff;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 12px 0;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .anilist-search-btn:active {
-            background: #0288d1;
-            transform: scale(0.98);
-        }
-
         .search-results {
             max-height: 200px;
             overflow-y: auto;
@@ -1038,14 +1016,6 @@
                     </label>
                 </div>
                 
-                <div style="margin: 16px 0;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">API ключ TMDB</div>
-                    <input type="text" id="tmdb-api-key" class="form-control" placeholder="Введите ваш TMDB API ключ">
-                    <p style="font-size: 11px; color: #888; margin-top: 4px;">
-                        Получите ключ на <a href="https://www.themoviedb.org/" style="color: #8774e1;" target="_blank">themoviedb.org</a>
-                    </p>
-                </div>
-                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
                     <button class="btn" onclick="exportData()">
                         <i class="fas fa-download"></i> Экспорт
@@ -1142,8 +1112,7 @@
                 <select id="search-type" class="form-control" style="flex: 1;">
                     <option value="anime">Аниме (Jikan API)</option>
                     <option value="manga">Манга (Jikan API)</option>
-                    <option value="movie">Фильмы (TMDB)</option>
-                    <option value="tv">Сериалы (TMDB)</option>
+                    <option value="series">Сериалы (TVmaze API)</option>
                 </select>
             </div>
             
@@ -1195,8 +1164,11 @@
         let platform = 'browser';
         let isTelegramWebApp = false;
         
-        // Jikan API (MyAnimeList)
+        // Jikan API (MyAnimeList) - для аниме и манги
         const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
+        
+        // TVmaze API - для сериалов (бесплатно, без API ключа)
+        const TVMAZE_API_BASE = 'https://api.tvmaze.com';
         
         // Проверяем доступность Telegram Web App
         function checkTelegramEnvironment() {
@@ -1306,24 +1278,21 @@
         let currentType = 'anime';
         let selectedRating = 0;
         let selectedStatusColor = '#8774e1';
-        let tmdbApiKey = '';
         
         // Данные
         let animeList = [];
         let mangaList = [];
-        let moviesList = [];
-        let seriesList = [];
+        let seriesList = []; // Убрали moviesList, оставили только сериалы
         let customStatuses = [];
         let currentStatusFilter = 'all';
         let themeColor = '#8774e1';
         let cloudStorage = null;
         let isOnline = true;
 
-        // Категории контента (без hentai)
+        // Категории контента (только аниме, манга и сериалы - без фильмов)
         const categories = [
             { id: 'anime', name: 'Аниме', icon: '🎬', color: '#8774e1' },
             { id: 'manga', name: 'Манга', icon: '📚', color: '#4caf50' },
-            { id: 'movies', name: 'Фильмы', icon: '🎥', color: '#ff9800' },
             { id: 'series', name: 'Сериалы', icon: '📺', color: '#2196f3' }
         ];
 
@@ -1337,12 +1306,11 @@
             { id: 'rewatching', name: 'Пересматриваю', color: '#9c27b0' }
         ];
 
-        // Достижения (без hentai)
+        // Достижения (только для аниме, манги и сериалов)
         const achievements = [
             { id: 'first_entry', name: 'Новичок', description: 'Добавьте первую запись', icon: '🎬', xp: 10 },
             { id: 'anime_fan', name: 'Фанат аниме', description: 'Добавьте 10 аниме', icon: '📺', xp: 50 },
             { id: 'manga_reader', name: 'Читатель', description: 'Добавьте 5 манги', icon: '📚', xp: 30 },
-            { id: 'film_buff', name: 'Киноман', description: 'Добавьте 5 фильмов', icon: '🎥', xp: 40 },
             { id: 'series_lover', name: 'Сериаломан', description: 'Добавьте 3 сериала', icon: '📺', xp: 30 },
             { id: 'completionist', name: 'Завершитель', description: 'Завершите 10 тайтлов', icon: '🏆', xp: 100 },
             { id: 'critic', name: 'Критик', description: 'Оцените 20 тайтлов', icon: '⭐', xp: 80 },
@@ -1359,8 +1327,8 @@
             { title: 'Demon Slayer', type: 'anime', reason: 'Высокий рейтинг, подходит под ваши предпочтения' },
             { title: 'Tokyo Revengers', type: 'anime', reason: 'На основе ваших драматических тайтлов' },
             { title: 'Chainsaw Man', type: 'manga', reason: 'Новый хит, соответствует вашему стилю' },
-            { title: 'Interstellar', type: 'movies', reason: 'Фильм высокого рейтинга в жанре фантастики' },
             { title: 'Breaking Bad', type: 'series', reason: 'Культовый сериал в жанре драмы' },
+            { title: 'Stranger Things', type: 'series', reason: 'Популярный сериал в жанре фантастики' },
             { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' }
         ];
 
@@ -1424,12 +1392,6 @@
         }
 
         async function loadData() {
-            // Загружаем TMDB API ключ
-            tmdbApiKey = localStorage.getItem(`tmdb_api_key_${userId}`) || '';
-            if (tmdbApiKey) {
-                document.getElementById('tmdb-api-key').value = tmdbApiKey;
-            }
-            
             // Пытаемся загрузить из облачного хранилища
             if (cloudStorage && document.getElementById('sync-toggle').checked) {
                 try {
@@ -1448,7 +1410,7 @@
         }
 
         async function loadFromCloud() {
-            const keys = ['animeList', 'mangaList', 'moviesList', 'seriesList', 'customStatuses', 'settings', 'userData'];
+            const keys = ['animeList', 'mangaList', 'seriesList', 'customStatuses', 'settings', 'userData'];
             const data = {};
             
             for (const key of keys) {
@@ -1475,7 +1437,6 @@
         function loadFromLocal() {
             animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
             mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
-            moviesList = JSON.parse(localStorage.getItem(`moviesList_${userId}`)) || [];
             seriesList = JSON.parse(localStorage.getItem(`seriesList_${userId}`)) || [];
             customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
             
@@ -1492,7 +1453,6 @@
         function loadFromObject(data) {
             animeList = data.animeList || [];
             mangaList = data.mangaList || [];
-            moviesList = data.moviesList || [];
             seriesList = data.seriesList || [];
             customStatuses = data.customStatuses || [];
             
@@ -1510,13 +1470,6 @@
         }
 
         async function saveData() {
-            // Сохраняем TMDB API ключ
-            const newTmdbKey = document.getElementById('tmdb-api-key').value.trim();
-            if (newTmdbKey && newTmdbKey !== tmdbApiKey) {
-                tmdbApiKey = newTmdbKey;
-                localStorage.setItem(`tmdb_api_key_${userId}`, tmdbApiKey);
-            }
-            
             // Сохраняем в localStorage
             saveToLocal();
             
@@ -1536,7 +1489,6 @@
         function saveToLocal() {
             localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
             localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
-            localStorage.setItem(`moviesList_${userId}`, JSON.stringify(moviesList));
             localStorage.setItem(`seriesList_${userId}`, JSON.stringify(seriesList));
             localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
             
@@ -1555,7 +1507,6 @@
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
-                moviesList: moviesList,
                 seriesList: seriesList,
                 customStatuses: customStatuses,
                 settings: {
@@ -1613,13 +1564,6 @@
             // Настройки
             document.getElementById('backup-toggle').addEventListener('change', saveSettings);
             document.getElementById('sync-toggle').addEventListener('change', saveSettings);
-            
-            // Сохранение TMDB API ключа при изменении
-            document.getElementById('tmdb-api-key').addEventListener('change', function() {
-                tmdbApiKey = this.value.trim();
-                localStorage.setItem(`tmdb_api_key_${userId}`, tmdbApiKey);
-                showNotification('TMDB API ключ сохранён');
-            });
 
             // Переключение вкладок
             document.querySelectorAll('.tab').forEach(tab => {
@@ -1739,9 +1683,6 @@
                     break;
                 case 'manga':
                     list = mangaList;
-                    break;
-                case 'movies':
-                    list = moviesList;
                     break;
                 case 'series':
                     list = seriesList;
@@ -1911,7 +1852,6 @@
             switch(currentType) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
-                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -1942,7 +1882,6 @@
             switch(type) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
-                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -1990,7 +1929,6 @@
             switch(type) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
-                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -2009,7 +1947,6 @@
             switch(type) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
-                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -2054,9 +1991,9 @@
             try {
                 let results = [];
                 
-                if (searchType === 'movie' || searchType === 'tv') {
-                    // Поиск фильмов/сериалов через TMDB
-                    results = await searchTMDB(query, searchType);
+                if (searchType === 'series') {
+                    // Поиск сериалов через TVmaze API
+                    results = await searchTVmaze(query);
                 } else {
                     // Поиск аниме/манги через Jikan API
                     results = await searchJikan(query, searchType);
@@ -2097,29 +2034,27 @@
             }
         }
 
-        async function searchTMDB(query, type) {
-            if (!tmdbApiKey) {
-                showNotification('Для поиска фильмов/сериалов нужен TMDB API ключ. Добавьте его в настройках.');
-                return [];
-            }
-            
+        async function searchTVmaze(query) {
             try {
-                const url = `https://api.themoviedb.org/3/search/${type}?api_key=${tmdbApiKey}&language=ru-RU&query=${encodeURIComponent(query)}&page=1`;
+                const url = `${TVMAZE_API_BASE}/search/shows?q=${encodeURIComponent(query)}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                return data.results.map(item => ({
-                    id: item.id,
-                    title: item.title || item.name,
-                    overview: item.overview,
-                    release_date: item.release_date || item.first_air_date,
-                    poster_path: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : '',
-                    type: type,
-                    vote_average: item.vote_average
+                return data.map(item => ({
+                    id: item.show.id,
+                    title: item.show.name,
+                    summary: item.show.summary ? item.show.summary.replace(/<[^>]*>/g, '') : '',
+                    premiered: item.show.premiered,
+                    image: item.show.image ? item.show.image.medium : '',
+                    rating: item.show.rating?.average || 0,
+                    genres: item.show.genres || [],
+                    status: item.show.status,
+                    episodes: null, // TVmaze не возвращает общее количество эпизодов в поиске
+                    year: item.show.premiered ? item.show.premiered.substring(0, 4) : ''
                 }));
             } catch (error) {
-                console.error('Ошибка поиска TMDB:', error);
-                showNotification('Ошибка поиска. Проверьте API ключ.');
+                console.error('Ошибка поиска в TVmaze API:', error);
+                showNotification('Ошибка поиска сериалов. Попробуйте позже.');
                 return [];
             }
         }
@@ -2137,9 +2072,9 @@
                 const title = result.title || result.name;
                 const episodes = result.episodes || '?';
                 const chapters = result.chapters || '?';
-                const cover = result.image || result.poster_path || '';
-                const year = result.year || (result.release_date ? result.release_date.substring(0, 4) : '');
-                const score = result.score || result.vote_average;
+                const cover = result.image || '';
+                const year = result.year || (result.premiered ? result.premiered.substring(0, 4) : '');
+                const score = result.score || result.rating;
                 
                 const item = document.createElement('div');
                 item.className = 'search-result-item';
@@ -2148,8 +2083,7 @@
                     <div style="font-size: 11px; color: #888;">
                         ${searchType === 'anime' ? `Эпизоды: ${episodes}` : 
                           searchType === 'manga' ? `Главы: ${chapters}` :
-                          searchType === 'movie' ? 'Фильм' :
-                          searchType === 'tv' ? 'Сериал' : ''}
+                          'Сериал'}
                         ${score ? ` • ★ ${score.toFixed(1)}` : ''}
                     </div>
                 `;
@@ -2160,7 +2094,7 @@
 
         function selectSearchResult(result, searchType) {
             const title = result.title || result.name;
-            const cover = result.image || result.poster_path || '';
+            const cover = result.image || '';
             
             document.getElementById('item-title').value = title;
             document.getElementById('item-cover').value = cover || '';
@@ -2171,9 +2105,9 @@
             } else if (searchType === 'manga') {
                 document.getElementById('item-total').value = result.chapters || '';
                 currentType = 'manga';
-            } else if (searchType === 'movie') {
-                currentType = 'movies';
-            } else if (searchType === 'tv') {
+            } else if (searchType === 'series') {
+                // Для TVmaze API мы не знаем общее количество эпизодов
+                // Оставляем поле пустым, пользователь заполнит вручную
                 currentType = 'series';
             }
             
@@ -2345,7 +2279,7 @@
             const unlocked = userData.unlockedAchievements || [];
             let newAchievements = [];
             
-            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
+            const allEntries = [...animeList, ...mangaList, ...seriesList];
             
             // Проверяем достижения
             if (allEntries.length >= 1 && !unlocked.includes('first_entry')) {
@@ -2359,10 +2293,6 @@
             if (mangaList.length >= 5 && !unlocked.includes('manga_reader')) {
                 unlocked.push('manga_reader');
                 newAchievements.push('Читатель');
-            }
-            if (moviesList.length >= 5 && !unlocked.includes('film_buff')) {
-                unlocked.push('film_buff');
-                newAchievements.push('Киноман');
             }
             if (seriesList.length >= 3 && !unlocked.includes('series_lover')) {
                 unlocked.push('series_lover');
@@ -2426,7 +2356,7 @@
             const container = document.getElementById('recommendations-list');
             container.innerHTML = '';
             
-            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
+            const allEntries = [...animeList, ...mangaList, ...seriesList];
             if (allEntries.length === 0) {
                 container.innerHTML = '<div class="card" style="text-align: center; color: #888; padding: 40px;">Добавьте несколько тайтлов для получения рекомендаций</div>';
                 return;
@@ -2443,8 +2373,7 @@
                     <div style="font-weight: 600; margin-bottom: 4px;">${rec.title}</div>
                     <div style="font-size: 11px; color: #888; margin-bottom: 6px;">
                         ${rec.type === 'anime' ? 'Аниме' : 
-                          rec.type === 'manga' ? 'Манга' : 
-                          rec.type === 'movies' ? 'Фильм' : 'Сериал'}
+                          rec.type === 'manga' ? 'Манга' : 'Сериал'}
                     </div>
                     <div style="font-size: 12px; color: #8774e1;">${rec.reason}</div>
                 `;
@@ -2488,10 +2417,12 @@
             // Основная статистика
             document.getElementById('total-anime').textContent = animeList.length;
             document.getElementById('total-manga').textContent = mangaList.length;
-            document.getElementById('total-movies').textContent = moviesList.length;
             document.getElementById('total-series').textContent = seriesList.length;
             
-            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
+            // Фильмы убраны, скрываем или показываем 0
+            document.getElementById('total-movies').textContent = 0;
+            
+            const allEntries = [...animeList, ...mangaList, ...seriesList];
             const completedCount = allEntries.filter(item => item.status === 'completed').length;
             const watchingCount = allEntries.filter(item => item.status === 'watching').length;
             const plannedCount = allEntries.filter(item => item.status === 'planned').length;
@@ -2514,14 +2445,12 @@
             
             const animeCount = animeList.length;
             const mangaCount = mangaList.length;
-            const moviesCount = moviesList.length;
             const seriesCount = seriesList.length;
             
             let favoriteType = '-';
             const counts = [
                 {type: 'Аниме', count: animeCount},
                 {type: 'Манга', count: mangaCount},
-                {type: 'Фильмы', count: moviesCount},
                 {type: 'Сериалы', count: seriesCount}
             ];
             
@@ -2582,7 +2511,7 @@
 
         function updateStorageInfo() {
             const data = {
-                animeList, mangaList, moviesList, seriesList, customStatuses,
+                animeList, mangaList, seriesList, customStatuses,
                 settings: {
                     lightTheme: document.body.classList.contains('light-theme'),
                     autoBackup: document.getElementById('backup-toggle').checked,
@@ -2622,7 +2551,6 @@
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
-                moviesList: moviesList,
                 seriesList: seriesList,
                 customStatuses: customStatuses,
                 userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
@@ -2659,7 +2587,6 @@
                         if (confirm('Заменить текущие данные?')) {
                             animeList = data.animeList || [];
                             mangaList = data.mangaList || [];
-                            moviesList = data.moviesList || [];
                             seriesList = data.seriesList || [];
                             customStatuses = data.customStatuses || [];
                             
@@ -2690,14 +2617,12 @@
                 const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
                 const avatar = localStorage.getItem(`avatar_${userId}`);
                 const userData = localStorage.getItem(`userData_${userId}`);
-                const tmdbKey = localStorage.getItem(`tmdb_api_key_${userId}`);
                 
                 localStorage.clear();
                 
                 if (settings) localStorage.setItem(`settings_${userId}`, JSON.stringify(settings));
                 if (avatar) localStorage.setItem(`avatar_${userId}`, avatar);
                 if (userData) localStorage.setItem(`userData_${userId}`, userData);
-                if (tmdbKey) localStorage.setItem(`tmdb_api_key_${userId}`, tmdbKey);
                 
                 localStorage.setItem('app_version', APP_VERSION);
                 await loadData();
@@ -2735,7 +2660,6 @@
                         await new Promise((resolve) => {
                             cloudStorage.removeItem(`animeList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`mangaList_${userId}`, () => resolve());
-                            cloudStorage.removeItem(`moviesList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`seriesList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`customStatuses_${userId}`, () => resolve());
                             cloudStorage.removeItem(`settings_${userId}`, () => resolve());
