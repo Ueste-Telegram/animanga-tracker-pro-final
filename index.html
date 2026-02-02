@@ -140,17 +140,6 @@
             border-color: #8774e1;
         }
 
-        .category-tab.adult {
-            background: #d32f2f;
-            color: white;
-            border-color: #d32f2f;
-        }
-
-        .category-tab.adult.active {
-            background: #b71c1c;
-            border-color: #b71c1c;
-        }
-
         .btn {
             background: #8774e1;
             color: white;
@@ -215,10 +204,6 @@
         .light-theme .item {
             background: #f8f9fa;
             border: 1px solid #e0e0e0;
-        }
-
-        .item.adult {
-            border-left: 4px solid #d32f2f;
         }
 
         .cover {
@@ -1088,7 +1073,7 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 3.1.0<br>
+                    Версия 3.2.0<br>
                     <span id="storage-info">Загрузка...</span><br>
                     <span id="cloud-status">Облако: проверка...</span><br>
                     <span id="platform-info"></span>
@@ -1121,9 +1106,6 @@
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <button class="btn" onclick="showSearchModal()" style="flex: 1;">
                     <i class="fas fa-search"></i> Поиск
-                </button>
-                <button class="btn" onclick="toggleAdult()" style="flex: 1; background: #d32f2f;" id="adult-toggle">
-                    <i class="fas fa-exclamation-triangle"></i> 18+
                 </button>
             </div>
             
@@ -1158,8 +1140,8 @@
             
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <select id="search-type" class="form-control" style="flex: 1;">
-                    <option value="anime">Аниме (AniList)</option>
-                    <option value="manga">Манга (AniList)</option>
+                    <option value="anime">Аниме (Jikan API)</option>
+                    <option value="manga">Манга (Jikan API)</option>
                     <option value="movie">Фильмы (TMDB)</option>
                     <option value="tv">Сериалы (TMDB)</option>
                 </select>
@@ -1205,13 +1187,16 @@
 
     <script>
         // Константа версии
-        const APP_VERSION = '3.1.0';
+        const APP_VERSION = '3.2.0';
         
         // Инициализация Telegram Web App с проверкой на ПК-версию
         let tg = null;
         let userId = 'default';
         let platform = 'browser';
         let isTelegramWebApp = false;
+        
+        // Jikan API (MyAnimeList)
+        const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
         
         // Проверяем доступность Telegram Web App
         function checkTelegramEnvironment() {
@@ -1320,7 +1305,6 @@
         let currentEditingId = null;
         let currentType = 'anime';
         let selectedRating = 0;
-        let isAdultContent = false;
         let selectedStatusColor = '#8774e1';
         let tmdbApiKey = '';
         
@@ -1329,21 +1313,18 @@
         let mangaList = [];
         let moviesList = [];
         let seriesList = [];
-        let hentaiList = [];
         let customStatuses = [];
         let currentStatusFilter = 'all';
         let themeColor = '#8774e1';
         let cloudStorage = null;
         let isOnline = true;
 
-        // Категории контента
+        // Категории контента (без hentai)
         const categories = [
             { id: 'anime', name: 'Аниме', icon: '🎬', color: '#8774e1' },
             { id: 'manga', name: 'Манга', icon: '📚', color: '#4caf50' },
             { id: 'movies', name: 'Фильмы', icon: '🎥', color: '#ff9800' },
-            { id: 'series', name: 'Сериалы', icon: '📺', color: '#2196f3' },
-            { id: 'hentai-anime', name: 'Хентай Аниме', icon: '🔞', color: '#d32f2f', adult: true },
-            { id: 'hentai-manga', name: 'Хентай Манга', icon: '🔞', color: '#d32f2f', adult: true }
+            { id: 'series', name: 'Сериалы', icon: '📺', color: '#2196f3' }
         ];
 
         // Стандартные статусы
@@ -1356,7 +1337,7 @@
             { id: 'rewatching', name: 'Пересматриваю', color: '#9c27b0' }
         ];
 
-        // Достижения
+        // Достижения (без hentai)
         const achievements = [
             { id: 'first_entry', name: 'Новичок', description: 'Добавьте первую запись', icon: '🎬', xp: 10 },
             { id: 'anime_fan', name: 'Фанат аниме', description: 'Добавьте 10 аниме', icon: '📺', xp: 50 },
@@ -1467,7 +1448,7 @@
         }
 
         async function loadFromCloud() {
-            const keys = ['animeList', 'mangaList', 'moviesList', 'seriesList', 'hentaiList', 'customStatuses', 'settings', 'userData'];
+            const keys = ['animeList', 'mangaList', 'moviesList', 'seriesList', 'customStatuses', 'settings', 'userData'];
             const data = {};
             
             for (const key of keys) {
@@ -1496,7 +1477,6 @@
             mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
             moviesList = JSON.parse(localStorage.getItem(`moviesList_${userId}`)) || [];
             seriesList = JSON.parse(localStorage.getItem(`seriesList_${userId}`)) || [];
-            hentaiList = JSON.parse(localStorage.getItem(`hentaiList_${userId}`)) || [];
             customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
             
             const settings = JSON.parse(localStorage.getItem(`settings_${userId}`)) || {};
@@ -1514,7 +1494,6 @@
             mangaList = data.mangaList || [];
             moviesList = data.moviesList || [];
             seriesList = data.seriesList || [];
-            hentaiList = data.hentaiList || [];
             customStatuses = data.customStatuses || [];
             
             const settings = data.settings || {};
@@ -1559,7 +1538,6 @@
             localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
             localStorage.setItem(`moviesList_${userId}`, JSON.stringify(moviesList));
             localStorage.setItem(`seriesList_${userId}`, JSON.stringify(seriesList));
-            localStorage.setItem(`hentaiList_${userId}`, JSON.stringify(hentaiList));
             localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
             
             const settings = {
@@ -1579,7 +1557,6 @@
                 mangaList: mangaList,
                 moviesList: moviesList,
                 seriesList: seriesList,
-                hentaiList: hentaiList,
                 customStatuses: customStatuses,
                 settings: {
                     lightTheme: document.body.classList.contains('light-theme'),
@@ -1689,7 +1666,7 @@
             
             categories.forEach(category => {
                 const tab = document.createElement('button');
-                tab.className = `category-tab ${category.adult ? 'adult' : ''} ${category.id === currentCategory ? 'active' : ''}`;
+                tab.className = `category-tab ${category.id === currentCategory ? 'active' : ''}`;
                 tab.innerHTML = `${category.icon} ${category.name}`;
                 tab.onclick = () => {
                     currentCategory = category.id;
@@ -1769,12 +1746,6 @@
                 case 'series':
                     list = seriesList;
                     break;
-                case 'hentai-anime':
-                    list = hentaiList.filter(item => item.type === 'hentai-anime');
-                    break;
-                case 'hentai-manga':
-                    list = hentaiList.filter(item => item.type === 'hentai-manga');
-                    break;
             }
             
             // Фильтруем по статусу
@@ -1792,23 +1763,22 @@
             filteredList.forEach(item => {
                 const status = [...defaultStatuses, ...customStatuses].find(s => s.id === item.status);
                 const progressPercent = item.total > 0 ? (item.progress / item.total) * 100 : 0;
-                const isAdult = item.isAdult || currentCategory.includes('hentai');
                 
                 const itemElement = document.createElement('div');
-                itemElement.className = `item fade-in ${isAdult ? 'adult' : ''}`;
+                itemElement.className = `item fade-in`;
                 itemElement.innerHTML = `
                     <div class="cover">
                         ${item.cover ? `<img src="${item.cover}" alt="${item.title}" onerror="this.style.display='none'">` : 
-                          currentCategory === 'anime' || currentCategory === 'hentai-anime' ? '<i class="fas fa-tv"></i>' :
-                          currentCategory === 'manga' || currentCategory === 'hentai-manga' ? '<i class="fas fa-book"></i>' :
+                          currentCategory === 'anime' ? '<i class="fas fa-tv"></i>' :
+                          currentCategory === 'manga' ? '<i class="fas fa-book"></i>' :
                           '<i class="fas fa-film"></i>'}
                     </div>
                     <div style="flex: 1;">
-                        <div class="title">${item.title} ${isAdult ? '🔞' : ''}</div>
+                        <div class="title">${item.title}</div>
                         <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
                             ${item.progress}/${item.total || '?'} 
-                            ${currentCategory === 'anime' || currentCategory === 'hentai-anime' ? 'эп.' :
-                              currentCategory === 'manga' || currentCategory === 'hentai-manga' ? 'гл.' : 'серий'}
+                            ${currentCategory === 'anime' ? 'эп.' :
+                              currentCategory === 'manga' ? 'гл.' : 'серий'}
                             ${item.rating ? '• ★'.repeat(item.rating) : ''}
                         </div>
                         <div class="progress-bar">
@@ -1842,8 +1812,8 @@
             
             categories.forEach(category => {
                 const button = document.createElement('button');
-                button.className = `btn ${category.adult ? 'adult' : ''}`;
-                button.style.backgroundColor = category.adult ? '#d32f2f' : category.color;
+                button.className = `btn`;
+                button.style.backgroundColor = category.color;
                 button.innerHTML = `${category.icon} ${category.name}`;
                 button.onclick = () => {
                     showAddForm(category.id);
@@ -1863,22 +1833,13 @@
             currentType = category;
             currentEditingId = null;
             selectedRating = 0;
-            isAdultContent = category.includes('hentai');
             
             const modal = document.getElementById('item-modal');
             const title = document.getElementById('modal-title');
-            const adultToggle = document.getElementById('adult-toggle');
             
             // Устанавливаем заголовок
             const categoryName = categories.find(c => c.id === category)?.name || 'Контент';
             title.textContent = `Добавить ${categoryName}`;
-            
-            // Настраиваем кнопку 18+
-            adultToggle.style.display = category.includes('hentai') ? 'none' : 'flex';
-            adultToggle.innerHTML = isAdultContent ? 
-                '<i class="fas fa-exclamation-triangle"></i> 18+' :
-                '<i class="fas fa-exclamation-triangle"></i> 18+';
-            adultToggle.style.backgroundColor = isAdultContent ? '#4caf50' : '#d32f2f';
             
             // Очистка формы
             document.getElementById('item-title').value = '';
@@ -1899,15 +1860,6 @@
             document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
             
             modal.style.display = 'flex';
-        }
-
-        function toggleAdult() {
-            isAdultContent = !isAdultContent;
-            const adultToggle = document.getElementById('adult-toggle');
-            adultToggle.innerHTML = isAdultContent ? 
-                '<i class="fas fa-check"></i> 18+' :
-                '<i class="fas fa-exclamation-triangle"></i> 18+';
-            adultToggle.style.backgroundColor = isAdultContent ? '#4caf50' : '#d32f2f';
         }
 
         function hideModal() {
@@ -1950,23 +1902,18 @@
                 status: status,
                 rating: selectedRating,
                 type: currentType,
-                isAdult: isAdultContent || currentType.includes('hentai'),
                 createdAt: currentEditingId ? null : new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
             
             // Выбираем нужный список
             let list;
-            if (currentType.includes('hentai')) {
-                list = hentaiList;
-            } else {
-                switch(currentType) {
-                    case 'anime': list = animeList; break;
-                    case 'manga': list = mangaList; break;
-                    case 'movies': list = moviesList; break;
-                    case 'series': list = seriesList; break;
-                    default: list = animeList;
-                }
+            switch(currentType) {
+                case 'anime': list = animeList; break;
+                case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
+                case 'series': list = seriesList; break;
+                default: list = animeList;
             }
             
             if (currentEditingId) {
@@ -1992,16 +1939,12 @@
             currentEditingId = id;
             
             let list;
-            if (type.includes('hentai')) {
-                list = hentaiList;
-            } else {
-                switch(type) {
-                    case 'anime': list = animeList; break;
-                    case 'manga': list = mangaList; break;
-                    case 'movies': list = moviesList; break;
-                    case 'series': list = seriesList; break;
-                    default: list = animeList;
-                }
+            switch(type) {
+                case 'anime': list = animeList; break;
+                case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
+                case 'series': list = seriesList; break;
+                default: list = animeList;
             }
             
             const item = list.find(i => i.id === id);
@@ -2009,7 +1952,6 @@
             
             const modal = document.getElementById('item-modal');
             const title = document.getElementById('modal-title');
-            const adultToggle = document.getElementById('adult-toggle');
             
             // Устанавливаем заголовок
             const categoryName = categories.find(c => c.id === type)?.name || 'Контент';
@@ -2038,14 +1980,6 @@
                 star.classList.toggle('active', parseInt(star.getAttribute('data-rating')) <= selectedRating);
             });
             
-            // Настройка кнопки 18+
-            isAdultContent = item.isAdult || false;
-            adultToggle.style.display = type.includes('hentai') ? 'none' : 'flex';
-            adultToggle.innerHTML = isAdultContent ? 
-                '<i class="fas fa-check"></i> 18+' :
-                '<i class="fas fa-exclamation-triangle"></i> 18+';
-            adultToggle.style.backgroundColor = isAdultContent ? '#4caf50' : '#d32f2f';
-            
             modal.style.display = 'flex';
         }
 
@@ -2053,16 +1987,12 @@
             if (!confirm('Удалить?')) return;
             
             let list;
-            if (type.includes('hentai')) {
-                list = hentaiList;
-            } else {
-                switch(type) {
-                    case 'anime': list = animeList; break;
-                    case 'manga': list = mangaList; break;
-                    case 'movies': list = moviesList; break;
-                    case 'series': list = seriesList; break;
-                    default: list = animeList;
-                }
+            switch(type) {
+                case 'anime': list = animeList; break;
+                case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
+                case 'series': list = seriesList; break;
+                default: list = animeList;
             }
             
             const index = list.findIndex(i => i.id === id);
@@ -2076,16 +2006,12 @@
 
         async function incrementProgress(type, id) {
             let list;
-            if (type.includes('hentai')) {
-                list = hentaiList;
-            } else {
-                switch(type) {
-                    case 'anime': list = animeList; break;
-                    case 'manga': list = mangaList; break;
-                    case 'movies': list = moviesList; break;
-                    case 'series': list = seriesList; break;
-                    default: list = animeList;
-                }
+            switch(type) {
+                case 'anime': list = animeList; break;
+                case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
+                case 'series': list = seriesList; break;
+                default: list = animeList;
             }
             
             const item = list.find(i => i.id === id);
@@ -2132,8 +2058,8 @@
                     // Поиск фильмов/сериалов через TMDB
                     results = await searchTMDB(query, searchType);
                 } else {
-                    // Поиск аниме/манги через AniList
-                    results = await searchAniList(query, searchType === 'anime' ? 'ANIME' : 'MANGA');
+                    // Поиск аниме/манги через Jikan API
+                    results = await searchJikan(query, searchType);
                 }
                 
                 displaySearchResults(results, searchType);
@@ -2143,42 +2069,32 @@
             }
         }
 
-        async function searchAniList(query, type) {
-            const anilistQuery = `
-                query ($search: String, $type: MediaType) {
-                    Page(page: 1, perPage: 10) {
-                        media(search: $search, type: $type) {
-                            id
-                            title {
-                                romaji
-                                english
-                                native
-                            }
-                            coverImage {
-                                large
-                            }
-                            episodes
-                            chapters
-                            status
-                        }
-                    }
-                }
-            `;
-            
-            const response = await fetch('https://graphql.anilist.co', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: anilistQuery,
-                    variables: { search: query, type: type }
-                })
-            });
-            
-            const data = await response.json();
-            return data.data.Page.media;
+        async function searchJikan(query, type) {
+            try {
+                const endpoint = type === 'anime' ? 'anime' : 'manga';
+                const url = `${JIKAN_API_BASE}/${endpoint}?q=${encodeURIComponent(query)}&limit=10&sfw`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                return data.data.map(item => ({
+                    id: item.mal_id,
+                    title: item.title,
+                    title_english: item.title_english,
+                    title_japanese: item.title_japanese,
+                    image: item.images?.jpg?.image_url || item.images?.jpg?.large_image_url || '',
+                    episodes: item.episodes,
+                    chapters: item.chapters,
+                    score: item.score,
+                    type: item.type,
+                    synopsis: item.synopsis,
+                    year: item.year || (item.aired?.prop?.from?.year || '')
+                }));
+            } catch (error) {
+                console.error('Ошибка поиска в Jikan API:', error);
+                showNotification('Ошибка поиска. Попробуйте позже.');
+                return [];
+            }
         }
 
         async function searchTMDB(query, type) {
@@ -2218,11 +2134,12 @@
             
             container.innerHTML = '';
             results.forEach(result => {
-                const title = result.title?.romaji || result.title?.english || result.title?.native || result.title || result.name;
+                const title = result.title || result.name;
                 const episodes = result.episodes || '?';
                 const chapters = result.chapters || '?';
-                const cover = result.coverImage?.large || result.poster_path || '';
-                const year = result.release_date ? result.release_date.substring(0, 4) : '';
+                const cover = result.image || result.poster_path || '';
+                const year = result.year || (result.release_date ? result.release_date.substring(0, 4) : '');
+                const score = result.score || result.vote_average;
                 
                 const item = document.createElement('div');
                 item.className = 'search-result-item';
@@ -2233,7 +2150,7 @@
                           searchType === 'manga' ? `Главы: ${chapters}` :
                           searchType === 'movie' ? 'Фильм' :
                           searchType === 'tv' ? 'Сериал' : ''}
-                        ${result.vote_average ? ` • ★ ${result.vote_average.toFixed(1)}` : ''}
+                        ${score ? ` • ★ ${score.toFixed(1)}` : ''}
                     </div>
                 `;
                 item.onclick = () => selectSearchResult(result, searchType);
@@ -2242,27 +2159,22 @@
         }
 
         function selectSearchResult(result, searchType) {
-            const title = result.title?.romaji || result.title?.english || result.title?.native || result.title || result.name;
-            const cover = result.coverImage?.large || result.poster_path || '';
+            const title = result.title || result.name;
+            const cover = result.image || result.poster_path || '';
             
             document.getElementById('item-title').value = title;
             document.getElementById('item-cover').value = cover || '';
             
-            if (searchType === 'anime' || searchType === 'movie' || searchType === 'tv') {
+            if (searchType === 'anime') {
                 document.getElementById('item-total').value = result.episodes || '';
+                currentType = 'anime';
             } else if (searchType === 'manga') {
                 document.getElementById('item-total').value = result.chapters || '';
-            }
-            
-            // Устанавливаем тип контента
-            if (searchType === 'movie') {
+                currentType = 'manga';
+            } else if (searchType === 'movie') {
                 currentType = 'movies';
             } else if (searchType === 'tv') {
                 currentType = 'series';
-            } else if (searchType === 'manga') {
-                currentType = 'manga';
-            } else {
-                currentType = 'anime';
             }
             
             hideSearchModal();
@@ -2433,7 +2345,7 @@
             const unlocked = userData.unlockedAchievements || [];
             let newAchievements = [];
             
-            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList, ...hentaiList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
             
             // Проверяем достижения
             if (allEntries.length >= 1 && !unlocked.includes('first_entry')) {
@@ -2572,24 +2484,6 @@
             });
         }
 
-        function formatTime(minutes) {
-            if (minutes < 60) {
-                return `${minutes}м`;
-            } else if (minutes < 1440) {
-                const hours = Math.floor(minutes / 60);
-                const mins = minutes % 60;
-                return mins > 0 ? `${hours}ч ${mins}м` : `${hours}ч`;
-            } else {
-                const days = Math.floor(minutes / 1440);
-                const hours = Math.floor((minutes % 1440) / 60);
-                if (hours > 0) {
-                    return `${days}д ${hours}ч`;
-                } else {
-                    return `${days}д`;
-                }
-            }
-        }
-
         function updateStats() {
             // Основная статистика
             document.getElementById('total-anime').textContent = animeList.length;
@@ -2597,11 +2491,7 @@
             document.getElementById('total-movies').textContent = moviesList.length;
             document.getElementById('total-series').textContent = seriesList.length;
             
-            const hentaiAnimeCount = hentaiList.filter(item => item.type === 'hentai-anime').length;
-            const hentaiMangaCount = hentaiList.filter(item => item.type === 'hentai-manga').length;
-            const totalHentai = hentaiAnimeCount + hentaiMangaCount;
-            
-            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList, ...hentaiList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
             const completedCount = allEntries.filter(item => item.status === 'completed').length;
             const watchingCount = allEntries.filter(item => item.status === 'watching').length;
             const plannedCount = allEntries.filter(item => item.status === 'planned').length;
@@ -2622,8 +2512,8 @@
             const daysInTracker = firstItem ? Math.floor((new Date() - new Date(firstItem.createdAt)) / (1000 * 60 * 60 * 24)) : 0;
             document.getElementById('total-days').textContent = daysInTracker;
             
-            const animeCount = animeList.length + hentaiAnimeCount;
-            const mangaCount = mangaList.length + hentaiMangaCount;
+            const animeCount = animeList.length;
+            const mangaCount = mangaList.length;
             const moviesCount = moviesList.length;
             const seriesCount = seriesList.length;
             
@@ -2692,7 +2582,7 @@
 
         function updateStorageInfo() {
             const data = {
-                animeList, mangaList, moviesList, seriesList, hentaiList, customStatuses,
+                animeList, mangaList, moviesList, seriesList, customStatuses,
                 settings: {
                     lightTheme: document.body.classList.contains('light-theme'),
                     autoBackup: document.getElementById('backup-toggle').checked,
@@ -2734,7 +2624,6 @@
                 mangaList: mangaList,
                 moviesList: moviesList,
                 seriesList: seriesList,
-                hentaiList: hentaiList,
                 customStatuses: customStatuses,
                 userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
                 exportDate: new Date().toISOString(),
@@ -2772,7 +2661,6 @@
                             mangaList = data.mangaList || [];
                             moviesList = data.moviesList || [];
                             seriesList = data.seriesList || [];
-                            hentaiList = data.hentaiList || [];
                             customStatuses = data.customStatuses || [];
                             
                             if (data.userData) {
@@ -2849,7 +2737,6 @@
                             cloudStorage.removeItem(`mangaList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`moviesList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`seriesList_${userId}`, () => resolve());
-                            cloudStorage.removeItem(`hentaiList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`customStatuses_${userId}`, () => resolve());
                             cloudStorage.removeItem(`settings_${userId}`, () => resolve());
                         });
