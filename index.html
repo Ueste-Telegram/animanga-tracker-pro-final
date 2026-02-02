@@ -896,12 +896,12 @@
                         <div class="stat-label">Манга</div>
                     </div>
                     <div class="stat-card">
-                        <div class="time-display" id="total-movies">0</div>
-                        <div class="time-label">Фильмы</div>
+                        <div class="stat-value" id="total-movies">0</div>
+                        <div class="stat-label">Фильмы</div>
                     </div>
                     <div class="stat-card">
-                        <div class="time-display" id="total-series">0</div>
-                        <div class="time-label">Сериалы</div>
+                        <div class="stat-value" id="total-series">0</div>
+                        <div class="stat-label">Сериалы</div>
                     </div>
                 </div>
                 
@@ -1043,7 +1043,7 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 3.2.0<br>
+                    Версия 3.3.0<br>
                     <span id="storage-info">Загрузка...</span><br>
                     <span id="cloud-status">Облако: проверка...</span><br>
                     <span id="platform-info"></span>
@@ -1081,7 +1081,7 @@
             
             <input type="text" id="item-title" class="form-control" placeholder="Название" required>
             <input type="text" id="item-cover" class="form-control" placeholder="URL обложки (опционально)">
-            <input type="number" id="item-total" class="form-control" placeholder="Всего эпизодов/глав/серий" min="0">
+            <input type="number" id="item-total" class="form-control" placeholder="Всего эпизодов/глав/серий/минут" min="0">
             <input type="number" id="item-progress" class="form-control" placeholder="Текущий прогресс" value="0" min="0">
             
             <select id="item-status" class="form-control" required>
@@ -1156,7 +1156,7 @@
 
     <script>
         // Константа версии
-        const APP_VERSION = '3.2.0';
+        const APP_VERSION = '3.3.0';
         
         // Инициализация Telegram Web App с проверкой на ПК-версию
         let tg = null;
@@ -1282,17 +1282,19 @@
         // Данные
         let animeList = [];
         let mangaList = [];
-        let seriesList = []; // Убрали moviesList, оставили только сериалы
+        let moviesList = []; // Добавлен список фильмов
+        let seriesList = [];
         let customStatuses = [];
         let currentStatusFilter = 'all';
         let themeColor = '#8774e1';
         let cloudStorage = null;
         let isOnline = true;
 
-        // Категории контента (только аниме, манга и сериалы - без фильмов)
+        // Категории контента
         const categories = [
             { id: 'anime', name: 'Аниме', icon: '🎬', color: '#8774e1' },
             { id: 'manga', name: 'Манга', icon: '📚', color: '#4caf50' },
+            { id: 'movies', name: 'Фильмы', icon: '🎥', color: '#ff9800' },
             { id: 'series', name: 'Сериалы', icon: '📺', color: '#2196f3' }
         ];
 
@@ -1306,12 +1308,13 @@
             { id: 'rewatching', name: 'Пересматриваю', color: '#9c27b0' }
         ];
 
-        // Достижения (только для аниме, манги и сериалов)
+        // Достижения
         const achievements = [
             { id: 'first_entry', name: 'Новичок', description: 'Добавьте первую запись', icon: '🎬', xp: 10 },
             { id: 'anime_fan', name: 'Фанат аниме', description: 'Добавьте 10 аниме', icon: '📺', xp: 50 },
             { id: 'manga_reader', name: 'Читатель', description: 'Добавьте 5 манги', icon: '📚', xp: 30 },
             { id: 'series_lover', name: 'Сериаломан', description: 'Добавьте 3 сериала', icon: '📺', xp: 30 },
+            { id: 'movie_buff', name: 'Киноман', description: 'Добавьте 3 фильма', icon: '🎥', xp: 30 },
             { id: 'completionist', name: 'Завершитель', description: 'Завершите 10 тайтлов', icon: '🏆', xp: 100 },
             { id: 'critic', name: 'Критик', description: 'Оцените 20 тайтлов', icon: '⭐', xp: 80 },
             { id: 'binge_watcher', name: 'Запоем', description: 'Посмотрите 200 серий', icon: '🍿', xp: 120 },
@@ -1327,9 +1330,11 @@
             { title: 'Demon Slayer', type: 'anime', reason: 'Высокий рейтинг, подходит под ваши предпочтения' },
             { title: 'Tokyo Revengers', type: 'anime', reason: 'На основе ваших драматических тайтлов' },
             { title: 'Chainsaw Man', type: 'manga', reason: 'Новый хит, соответствует вашему стилю' },
+            { title: 'The Shawshank Redemption', type: 'movies', reason: 'Лучший фильм по мнению IMDb' },
             { title: 'Breaking Bad', type: 'series', reason: 'Культовый сериал в жанре драмы' },
             { title: 'Stranger Things', type: 'series', reason: 'Популярный сериал в жанре фантастики' },
-            { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' }
+            { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' },
+            { title: 'Inception', type: 'movies', reason: 'Фильм с невероятным сюжетом и визуальными эффектами' }
         ];
 
         // Инициализация при загрузке
@@ -1410,7 +1415,7 @@
         }
 
         async function loadFromCloud() {
-            const keys = ['animeList', 'mangaList', 'seriesList', 'customStatuses', 'settings', 'userData'];
+            const keys = ['animeList', 'mangaList', 'moviesList', 'seriesList', 'customStatuses', 'settings', 'userData'];
             const data = {};
             
             for (const key of keys) {
@@ -1437,6 +1442,7 @@
         function loadFromLocal() {
             animeList = JSON.parse(localStorage.getItem(`animeList_${userId}`)) || [];
             mangaList = JSON.parse(localStorage.getItem(`mangaList_${userId}`)) || [];
+            moviesList = JSON.parse(localStorage.getItem(`moviesList_${userId}`)) || [];
             seriesList = JSON.parse(localStorage.getItem(`seriesList_${userId}`)) || [];
             customStatuses = JSON.parse(localStorage.getItem(`customStatuses_${userId}`)) || [];
             
@@ -1453,6 +1459,7 @@
         function loadFromObject(data) {
             animeList = data.animeList || [];
             mangaList = data.mangaList || [];
+            moviesList = data.moviesList || [];
             seriesList = data.seriesList || [];
             customStatuses = data.customStatuses || [];
             
@@ -1489,6 +1496,7 @@
         function saveToLocal() {
             localStorage.setItem(`animeList_${userId}`, JSON.stringify(animeList));
             localStorage.setItem(`mangaList_${userId}`, JSON.stringify(mangaList));
+            localStorage.setItem(`moviesList_${userId}`, JSON.stringify(moviesList));
             localStorage.setItem(`seriesList_${userId}`, JSON.stringify(seriesList));
             localStorage.setItem(`customStatuses_${userId}`, JSON.stringify(customStatuses));
             
@@ -1507,6 +1515,7 @@
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
+                moviesList: moviesList,
                 seriesList: seriesList,
                 customStatuses: customStatuses,
                 settings: {
@@ -1684,6 +1693,9 @@
                 case 'manga':
                     list = mangaList;
                     break;
+                case 'movies':
+                    list = moviesList;
+                    break;
                 case 'series':
                     list = seriesList;
                     break;
@@ -1705,6 +1717,13 @@
                 const status = [...defaultStatuses, ...customStatuses].find(s => s.id === item.status);
                 const progressPercent = item.total > 0 ? (item.progress / item.total) * 100 : 0;
                 
+                // Определяем единицы измерения
+                let unit = '';
+                if (currentCategory === 'anime') unit = 'эп.';
+                else if (currentCategory === 'manga') unit = 'гл.';
+                else if (currentCategory === 'movies') unit = 'мин.';
+                else unit = 'серий';
+                
                 const itemElement = document.createElement('div');
                 itemElement.className = `item fade-in`;
                 itemElement.innerHTML = `
@@ -1712,14 +1731,13 @@
                         ${item.cover ? `<img src="${item.cover}" alt="${item.title}" onerror="this.style.display='none'">` : 
                           currentCategory === 'anime' ? '<i class="fas fa-tv"></i>' :
                           currentCategory === 'manga' ? '<i class="fas fa-book"></i>' :
-                          '<i class="fas fa-film"></i>'}
+                          currentCategory === 'movies' ? '<i class="fas fa-film"></i>' :
+                          '<i class="fas fa-tv"></i>'}
                     </div>
                     <div style="flex: 1;">
                         <div class="title">${item.title}</div>
                         <div style="font-size: 11px; color: #888; margin-bottom: 4px;">
-                            ${item.progress}/${item.total || '?'} 
-                            ${currentCategory === 'anime' ? 'эп.' :
-                              currentCategory === 'manga' ? 'гл.' : 'серий'}
+                            ${item.progress}/${item.total || '?'} ${unit}
                             ${item.rating ? '• ★'.repeat(item.rating) : ''}
                         </div>
                         <div class="progress-bar">
@@ -1852,6 +1870,7 @@
             switch(currentType) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -1882,6 +1901,7 @@
             switch(type) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -1929,6 +1949,7 @@
             switch(type) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -1947,6 +1968,7 @@
             switch(type) {
                 case 'anime': list = animeList; break;
                 case 'manga': list = mangaList; break;
+                case 'movies': list = moviesList; break;
                 case 'series': list = seriesList; break;
                 default: list = animeList;
             }
@@ -2279,7 +2301,7 @@
             const unlocked = userData.unlockedAchievements || [];
             let newAchievements = [];
             
-            const allEntries = [...animeList, ...mangaList, ...seriesList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
             
             // Проверяем достижения
             if (allEntries.length >= 1 && !unlocked.includes('first_entry')) {
@@ -2297,6 +2319,10 @@
             if (seriesList.length >= 3 && !unlocked.includes('series_lover')) {
                 unlocked.push('series_lover');
                 newAchievements.push('Сериаломан');
+            }
+            if (moviesList.length >= 3 && !unlocked.includes('movie_buff')) {
+                unlocked.push('movie_buff');
+                newAchievements.push('Киноман');
             }
             
             const completedCount = allEntries.filter(item => item.status === 'completed').length;
@@ -2356,7 +2382,7 @@
             const container = document.getElementById('recommendations-list');
             container.innerHTML = '';
             
-            const allEntries = [...animeList, ...mangaList, ...seriesList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
             if (allEntries.length === 0) {
                 container.innerHTML = '<div class="card" style="text-align: center; color: #888; padding: 40px;">Добавьте несколько тайтлов для получения рекомендаций</div>';
                 return;
@@ -2373,7 +2399,8 @@
                     <div style="font-weight: 600; margin-bottom: 4px;">${rec.title}</div>
                     <div style="font-size: 11px; color: #888; margin-bottom: 6px;">
                         ${rec.type === 'anime' ? 'Аниме' : 
-                          rec.type === 'manga' ? 'Манга' : 'Сериал'}
+                          rec.type === 'manga' ? 'Манга' : 
+                          rec.type === 'movies' ? 'Фильм' : 'Сериал'}
                     </div>
                     <div style="font-size: 12px; color: #8774e1;">${rec.reason}</div>
                 `;
@@ -2417,12 +2444,10 @@
             // Основная статистика
             document.getElementById('total-anime').textContent = animeList.length;
             document.getElementById('total-manga').textContent = mangaList.length;
+            document.getElementById('total-movies').textContent = moviesList.length;
             document.getElementById('total-series').textContent = seriesList.length;
             
-            // Фильмы убраны, скрываем или показываем 0
-            document.getElementById('total-movies').textContent = 0;
-            
-            const allEntries = [...animeList, ...mangaList, ...seriesList];
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
             const completedCount = allEntries.filter(item => item.status === 'completed').length;
             const watchingCount = allEntries.filter(item => item.status === 'watching').length;
             const plannedCount = allEntries.filter(item => item.status === 'planned').length;
@@ -2445,12 +2470,14 @@
             
             const animeCount = animeList.length;
             const mangaCount = mangaList.length;
+            const moviesCount = moviesList.length;
             const seriesCount = seriesList.length;
             
             let favoriteType = '-';
             const counts = [
                 {type: 'Аниме', count: animeCount},
                 {type: 'Манга', count: mangaCount},
+                {type: 'Фильмы', count: moviesCount},
                 {type: 'Сериалы', count: seriesCount}
             ];
             
@@ -2511,7 +2538,7 @@
 
         function updateStorageInfo() {
             const data = {
-                animeList, mangaList, seriesList, customStatuses,
+                animeList, mangaList, moviesList, seriesList, customStatuses,
                 settings: {
                     lightTheme: document.body.classList.contains('light-theme'),
                     autoBackup: document.getElementById('backup-toggle').checked,
@@ -2551,6 +2578,7 @@
             const data = {
                 animeList: animeList,
                 mangaList: mangaList,
+                moviesList: moviesList,
                 seriesList: seriesList,
                 customStatuses: customStatuses,
                 userData: JSON.parse(localStorage.getItem(`userData_${userId}`)) || {},
@@ -2587,6 +2615,7 @@
                         if (confirm('Заменить текущие данные?')) {
                             animeList = data.animeList || [];
                             mangaList = data.mangaList || [];
+                            moviesList = data.moviesList || [];
                             seriesList = data.seriesList || [];
                             customStatuses = data.customStatuses || [];
                             
@@ -2660,6 +2689,7 @@
                         await new Promise((resolve) => {
                             cloudStorage.removeItem(`animeList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`mangaList_${userId}`, () => resolve());
+                            cloudStorage.removeItem(`moviesList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`seriesList_${userId}`, () => resolve());
                             cloudStorage.removeItem(`customStatuses_${userId}`, () => resolve());
                             cloudStorage.removeItem(`settings_${userId}`, () => resolve());
