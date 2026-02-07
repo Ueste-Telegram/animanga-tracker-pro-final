@@ -741,6 +741,8 @@
             gap: 8px;
             justify-content: center;
             margin-top: 16px;
+            width: 100%;
+            flex-wrap: wrap;
         }
 
         .profile-action-btn {
@@ -752,6 +754,10 @@
             cursor: pointer;
             font-size: 12px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
         }
 
         .profile-action-btn:active {
@@ -886,6 +892,20 @@
             border: 1px solid #e0e0e0;
         }
 
+        /* ИСПРАВЛЕНИЕ ДЛЯ ПК: Делаем кнопки более заметными */
+        @media (min-width: 768px) {
+            .profile-action-btn {
+                padding: 10px 20px;
+                font-size: 13px;
+                min-width: 120px;
+                justify-content: center;
+            }
+            
+            .profile-actions {
+                flex-wrap: nowrap;
+            }
+        }
+
         @media (max-width: 480px) {
             .container { padding: 10px; padding-bottom: 60px; }
             .header { padding: 14px; border-radius: 14px; }
@@ -897,6 +917,7 @@
             .floating-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; }
             .avatar { width: 70px; height: 70px; }
             .category-tab { padding: 8px 12px; font-size: 12px; }
+            .profile-action-btn { padding: 6px 12px; font-size: 11px; }
         }
 
         .welcome-modal .modal-content {
@@ -2531,9 +2552,26 @@
             localStorage.setItem(`hasSeenWelcome_${userId}`, 'true');
         }
 
+        // === ИСПРАВЛЕНИЕ ДЛЯ ПРИВЕТСТВЕННОГО СООБЩЕНИЯ В БОТЕ ===
+        // Эта функция показывает приветствие при запуске Mini App, если пользователь еще не видел его
+        function checkAndShowBotWelcome() {
+            // Проверяем, есть ли параметр запуска от бота
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromStart = urlParams.get('start') === 'true';
+            
+            if (fromStart && !localStorage.getItem(`hasSeenBotWelcome_${userId}`)) {
+                // Показываем приветственное сообщение в самом приложении
+                setTimeout(() => {
+                    alert("🎌 Добро пожаловать в AniManga Tracker PRO!\n\n📱 Все функции доступны в этом мини-приложении:\n• Отслеживайте аниме, мангу, фильмы и сериалы\n• Получайте рекомендации\n• Зарабатывайте достижения\n\n☁️ Ваши данные сохраняются в облаке Telegram!");
+                    localStorage.setItem(`hasSeenBotWelcome_${userId}`, 'true');
+                }, 1000);
+            }
+        }
+
         // Запуск
         document.addEventListener('DOMContentLoaded', async function() {
             await initializeApp();
+            checkAndShowBotWelcome(); // Проверяем приветствие от бота
         });
 
         setTimeout(() => {
@@ -2542,8 +2580,7 @@
             generateSmartRecommendations();
         }, 100);
 
-        // ТЕКСТ ДЛЯ КОМАНДЫ /start В БОТЕ (ВСЕ В ОДНОМ ФАЙЛЕ)
-        // Скопируйте этот текст и вставьте в обработчик команды /start вашего бота
+        // ТЕКСТ ДЛЯ КОМАНДЫ /start В БОТЕ (ДЛЯ ОТПРАВКИ ПОЛЬЗОВАТЕЛЮ)
         const START_COMMAND_TEXT = `🎌 Добро пожаловать в AniManga Tracker PRO!
 
 Это бот для отслеживания аниме, манги, фильмов и сериалов.
@@ -2573,6 +2610,20 @@
         console.log("=== ТЕКСТ ДЛЯ КОМАНДЫ /start ===");
         console.log(START_COMMAND_TEXT);
         console.log("=== КОНЕЦ ТЕКСТА ===");
+        
+        // === ВАЖНО! ===
+        // ЭТОТ ТЕКСТ НУЖНО СКОПИРОВАТЬ И ВСТАВИТЬ В КОД БОТА
+        // Например, в Python:
+        /*
+        async def start(update: Update, context: CallbackContext) -> None:
+            start_text = """🎌 Добро пожаловать в AniManga Tracker PRO!..."""
+            await update.message.reply_text(start_text, parse_mode='Markdown')
+        */
+        
+        // === ДЛЯ ТЕСТА: СБРОС ПРИВЕТСТВИЯ ===
+        // Если хочешь сбросить приветствие на всех аккаунтах, раскомментируй эту строку:
+        // localStorage.removeItem(`hasSeenWelcome_${userId}`);
+        // localStorage.removeItem(`hasSeenBotWelcome_${userId}`);
     </script>
 </body>
 </html>
