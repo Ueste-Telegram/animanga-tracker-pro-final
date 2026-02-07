@@ -844,6 +844,32 @@
             .avatar { width: 70px; height: 70px; }
             .category-tab { padding: 8px 12px; font-size: 12px; }
         }
+
+        /* Стили для приветственного сообщения */
+        .welcome-modal .modal-content {
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .welcome-modal h3 {
+            color: #8774e1;
+            margin-bottom: 15px;
+        }
+
+        .welcome-modal p {
+            margin-bottom: 12px;
+            line-height: 1.4;
+            color: #888;
+        }
+
+        .light-theme .welcome-modal p {
+            color: #666;
+        }
+
+        .welcome-modal .btn {
+            margin-top: 10px;
+            background: #8774e1;
+        }
     </style>
 </head>
 <body class="dark-theme">
@@ -854,10 +880,10 @@
         </div>
 
         <div class="tabs">
-            <button class="tab active" data-tab="main">Главная</button>
-            <button class="tab" data-tab="profile">Профиль</button>
-            <button class="tab" data-tab="recommendations">Рекомендации</button>
-            <button class="tab" data-tab="settings">Настройки</button>
+            <button class="tab active" data-tab="main" onclick="switchTab('main')">Главная</button>
+            <button class="tab" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
+            <button class="tab" data-tab="recommendations" onclick="switchTab('recommendations')">Рекомендации</button>
+            <button class="tab" data-tab="settings" onclick="switchTab('settings')">Настройки</button>
         </div>
 
         <div id="main-tab" class="tab-content">
@@ -955,7 +981,7 @@
         <div id="recommendations-tab" class="tab-content hidden">
             <div class="card">
                 <h3 style="margin-bottom: 12px;">🎯 Умные рекомендации</h3>
-                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях</p>
+                <p style="color: #888; margin-bottom: 16px;">Основано на ваших предпочтениях и популярности</p>
                 <button class="btn" onclick="generateRecommendations()">
                     <i class="fas fa-sync"></i> Обновить рекомендации
                 </button>
@@ -1043,7 +1069,7 @@
                 </button>
 
                 <div style="text-align: center; margin-top: 15px; color: #888; font-size: 11px;">
-                    Версия 3.3.0<br>
+                    Версия 3.3.1<br>
                     <span id="storage-info">Загрузка...</span><br>
                     <span id="cloud-status">Облако: проверка...</span><br>
                     <span id="platform-info"></span>
@@ -1152,11 +1178,31 @@
         </div>
     </div>
 
+    <!-- Приветственное сообщение -->
+    <div id="welcome-modal" class="modal welcome-modal" style="display: none;">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 16px;">👋 Добро пожаловать в AniManga Tracker PRO!</h3>
+            <p>Привет! Это мини-приложение внутри Telegram для отслеживания аниме, манги, фильмов и сериалов.</p>
+            <p>🎯 <b>Важно:</b> Все функции доступны именно в этом мини-приложении, а не в чате бота!</p>
+            <p>📱 <b>Как пользоваться:</b><br>
+            1. Добавляйте контент через кнопку "+"<br>
+            2. Отслеживайте прогресс<br>
+            3. Получайте персонализированные рекомендации</p>
+            <p>☁️ <b>Преимущества:</b><br>
+            • Данные сохраняются в облаке Telegram<br>
+            • Работает на всех устройствах<br>
+            • Полная синхронизация</p>
+            <button class="btn" onclick="hideWelcomeModal()" style="margin-top: 16px;">
+                <i class="fas fa-rocket"></i> Начать пользоваться
+            </button>
+        </div>
+    </div>
+
     <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
 
     <script>
         // Константа версии
-        const APP_VERSION = '3.3.0';
+        const APP_VERSION = '3.3.1';
         
         // Инициализация Telegram Web App с проверкой на ПК-версию
         let tg = null;
@@ -1282,7 +1328,7 @@
         // Данные
         let animeList = [];
         let mangaList = [];
-        let moviesList = []; // Добавлен список фильмов
+        let moviesList = [];
         let seriesList = [];
         let customStatuses = [];
         let currentStatusFilter = 'all';
@@ -1323,19 +1369,57 @@
             { id: 'customizer', name: 'Кастомайзер', description: 'Создайте 5 пользовательских статусов', icon: '🎨', xp: 60 }
         ];
 
-        // Рекомендации
-        const sampleRecommendations = [
-            { title: 'Attack on Titan', type: 'anime', reason: 'Похоже на ваши завершённые экшн-тайтлы' },
-            { title: 'One Piece', type: 'manga', reason: 'Популярно среди фанатов длинных серий' },
-            { title: 'Demon Slayer', type: 'anime', reason: 'Высокий рейтинг, подходит под ваши предпочтения' },
-            { title: 'Tokyo Revengers', type: 'anime', reason: 'На основе ваших драматических тайтлов' },
-            { title: 'Chainsaw Man', type: 'manga', reason: 'Новый хит, соответствует вашему стилю' },
-            { title: 'The Shawshank Redemption', type: 'movies', reason: 'Лучший фильм по мнению IMDb' },
-            { title: 'Breaking Bad', type: 'series', reason: 'Культовый сериал в жанре драмы' },
-            { title: 'Stranger Things', type: 'series', reason: 'Популярный сериал в жанре фантастики' },
-            { title: 'Jujutsu Kaisen', type: 'anime', reason: 'Современный хит в жанре сёнэн' },
-            { title: 'Inception', type: 'movies', reason: 'Фильм с невероятным сюжетом и визуальными эффектами' }
-        ];
+        // База рекомендаций (расширенная)
+        const recommendationsDatabase = {
+            anime: [
+                { title: 'Attack on Titan', reason: 'Эпичная история с отличной анимацией и сюжетом', score: 9.0, year: 2013 },
+                { title: 'Fullmetal Alchemist: Brotherhood', reason: 'Идеальный сёнэн с глубоким сюжетом', score: 9.1, year: 2009 },
+                { title: 'Death Note', reason: 'Психологический триллер с умным сюжетом', score: 8.6, year: 2006 },
+                { title: 'Demon Slayer', reason: 'Визуальный шедевр с захватывающими битвами', score: 8.7, year: 2019 },
+                { title: 'Jujutsu Kaisen', reason: 'Современный хит с крутыми персонажами', score: 8.6, year: 2020 },
+                { title: 'One Piece', reason: 'Эпическое приключение на сотни часов', score: 8.7, year: 1999 },
+                { title: 'Naruto', reason: 'Классика сёнэна о становлении ниндзя', score: 8.3, year: 2002 },
+                { title: 'My Hero Academia', reason: 'Супергеройская тема в японском стиле', score: 8.4, year: 2016 },
+                { title: 'Tokyo Ghoul', reason: 'Мрачная история о полу-гуле', score: 7.8, year: 2014 },
+                { title: 'Hunter x Hunter', reason: 'Сложная система способностей и развитие персонажей', score: 9.0, year: 2011 }
+            ],
+            manga: [
+                { title: 'Berserk', reason: 'Темное фэнтези с глубоким сюжетом', score: 9.5, year: 1989 },
+                { title: 'One Piece', reason: 'Самая продаваемая манга в истории', score: 9.0, year: 1997 },
+                { title: 'Naruto', reason: 'Классика сёнэн-манги', score: 8.3, year: 1999 },
+                { title: 'Attack on Titan', reason: 'Сложный сюжет с неожиданными поворотами', score: 9.0, year: 2009 },
+                { title: 'Chainsaw Man', reason: 'Свежий и безумный экшен', score: 8.7, year: 2018 },
+                { title: 'Tokyo Revengers', reason: 'Драма с элементами тайм-тревела', score: 8.2, year: 2017 },
+                { title: 'Jujutsu Kaisen', reason: 'Отличная рисовка и динамичные бои', score: 8.6, year: 2018 },
+                { title: 'Death Note', reason: 'Интеллектуальное противостояние', score: 8.6, year: 2003 },
+                { title: 'Demon Slayer', reason: 'Простая, но эмоциональная история', score: 8.7, year: 2016 },
+                { title: 'Blue Lock', reason: 'Инновационный подход к спортивной манге', score: 8.4, year: 2018 }
+            ],
+            movies: [
+                { title: 'Начало (Inception)', reason: 'Умный научно-фантастический триллер', score: 8.8, year: 2010 },
+                { title: 'Побег из Шоушенка (The Shawshank Redemption)', reason: 'Лучший фильм по версии IMDb', score: 9.3, year: 1994 },
+                { title: 'Криминальное чтиво (Pulp Fiction)', reason: 'Культовый фильм Тарантино', score: 8.9, year: 1994 },
+                { title: 'Темный рыцарь (The Dark Knight)', reason: 'Лучший супергеройский фильм', score: 9.0, year: 2008 },
+                { title: 'Форрест Гамп (Forrest Gump)', reason: 'Трогательная история жизни', score: 8.8, year: 1994 },
+                { title: 'Бойцовский клуб (Fight Club)', reason: 'Культовый фильм с неожиданным финалом', score: 8.8, year: 1999 },
+                { title: 'Матрица (The Matrix)', reason: 'Революционный научно-фантастический боевик', score: 8.7, year: 1999 },
+                { title: 'Король Лев (The Lion King)', reason: 'Лучший анимационный фильм Disney', score: 8.5, year: 1994 },
+                { title: 'ВАЛЛИ (WALL-E)', reason: 'Глубокая и трогательная анимация Pixar', score: 8.4, year: 2008 },
+                { title: 'Интерстеллар (Interstellar)', reason: 'Эпичная научная фантастика', score: 8.6, year: 2014 }
+            ],
+            series: [
+                { title: 'Во все тяжкие (Breaking Bad)', reason: 'Идеальный сериал с развитием персонажа', score: 9.5, year: 2008 },
+                { title: 'Игра престолов (Game of Thrones)', reason: 'Эпичное фэнтези с политическими интригами', score: 9.2, year: 2011 },
+                { title: 'Очень странные дела (Stranger Things)', reason: 'Ностальгический хоррор-сериал', score: 8.7, year: 2016 },
+                { title: 'Черное зеркало (Black Mirror)', reason: 'Антология о технологиях и обществе', score: 8.8, year: 2011 },
+                { title: 'Друзья (Friends)', reason: 'Культовый комедийный сериал', score: 8.9, year: 1994 },
+                { title: 'Шерлок (Sherlock)', reason: 'Современная адаптация классики', score: 9.1, year: 2010 },
+                { title: 'Офис (The Office)', reason: 'Лучший комедийный сериал о работе', score: 9.0, year: 2005 },
+                { title: 'Настоящий детектив (True Detective)', reason: 'Детектив с философским подтекстом', score: 8.9, year: 2014 },
+                { title: 'Мандалорец (The Mandalorian)', reason: 'Лучший сериал по вселенной Star Wars', score: 8.8, year: 2019 },
+                { title: 'Бумажный дом (La Casa de Papel)', reason: 'Захватывающий сериал об ограблении', score: 8.2, year: 2017 }
+            ]
+        };
 
         // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1369,6 +1453,13 @@
                 updateStorageInfo();
                 updateSyncStatus();
                 
+                // Показываем приветственное сообщение при первом запуске
+                if (!localStorage.getItem(`hasSeenWelcome_${userId}`)) {
+                    setTimeout(() => {
+                        showWelcomeModal();
+                    }, 500);
+                }
+                
                 // Показываем рекомендации
                 generateRecommendations();
                 
@@ -1376,6 +1467,17 @@
                 console.error('Ошибка инициализации:', error);
                 showNotification('Ошибка загрузки приложения');
             }
+        }
+
+        function showWelcomeModal() {
+            const modal = document.getElementById('welcome-modal');
+            modal.style.display = 'flex';
+        }
+
+        function hideWelcomeModal() {
+            const modal = document.getElementById('welcome-modal');
+            modal.style.display = 'none';
+            localStorage.setItem(`hasSeenWelcome_${userId}`, 'true');
         }
 
         async function initCloudStorage() {
@@ -1573,14 +1675,6 @@
             // Настройки
             document.getElementById('backup-toggle').addEventListener('change', saveSettings);
             document.getElementById('sync-toggle').addEventListener('change', saveSettings);
-
-            // Переключение вкладок
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    switchTab(tabName);
-                });
-            });
 
             // Следим за онлайн-статусом
             window.addEventListener('online', () => {
@@ -2071,7 +2165,7 @@
                     rating: item.show.rating?.average || 0,
                     genres: item.show.genres || [],
                     status: item.show.status,
-                    episodes: null, // TVmaze не возвращает общее количество эпизодов в поиске
+                    episodes: null,
                     year: item.show.premiered ? item.show.premiered.substring(0, 4) : ''
                 }));
             } catch (error) {
@@ -2128,8 +2222,6 @@
                 document.getElementById('item-total').value = result.chapters || '';
                 currentType = 'manga';
             } else if (searchType === 'series') {
-                // Для TVmaze API мы не знаем общее количество эпизодов
-                // Оставляем поле пустым, пользователь заполнит вручную
                 currentType = 'series';
             }
             
@@ -2388,11 +2480,14 @@
                 return;
             }
             
-            const shuffledRecommendations = [...sampleRecommendations]
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 8);
+            // Анализируем предпочтения пользователя
+            const userPreferences = analyzeUserPreferences();
             
-            shuffledRecommendations.forEach(rec => {
+            // Получаем рекомендации на основе предпочтений
+            const recommendations = getPersonalizedRecommendations(userPreferences);
+            
+            // Отображаем рекомендации
+            recommendations.forEach(rec => {
                 const item = document.createElement('div');
                 item.className = 'recommendation-item';
                 item.innerHTML = `
@@ -2401,6 +2496,8 @@
                         ${rec.type === 'anime' ? 'Аниме' : 
                           rec.type === 'manga' ? 'Манга' : 
                           rec.type === 'movies' ? 'Фильм' : 'Сериал'}
+                        ${rec.year ? ` • ${rec.year}` : ''}
+                        ${rec.score ? ` • ★ ${rec.score}` : ''}
                     </div>
                     <div style="font-size: 12px; color: #8774e1;">${rec.reason}</div>
                 `;
@@ -2411,6 +2508,98 @@
                 };
                 container.appendChild(item);
             });
+        }
+
+        function analyzeUserPreferences() {
+            const preferences = {
+                favoriteType: null,
+                avgRating: 0,
+                completedRatio: 0,
+                totalEntries: 0
+            };
+            
+            const allEntries = [...animeList, ...mangaList, ...moviesList, ...seriesList];
+            preferences.totalEntries = allEntries.length;
+            
+            if (allEntries.length === 0) return preferences;
+            
+            // Определяем любимый тип
+            const typeCounts = {
+                anime: animeList.length,
+                manga: mangaList.length,
+                movies: moviesList.length,
+                series: seriesList.length
+            };
+            
+            let maxCount = 0;
+            for (const [type, count] of Object.entries(typeCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    preferences.favoriteType = type;
+                }
+            }
+            
+            // Рассчитываем средний рейтинг
+            const ratedEntries = allEntries.filter(item => item.rating > 0);
+            if (ratedEntries.length > 0) {
+                preferences.avgRating = ratedEntries.reduce((sum, item) => sum + item.rating, 0) / ratedEntries.length;
+            }
+            
+            // Рассчитываем процент завершенных
+            const completedEntries = allEntries.filter(item => item.status === 'completed');
+            preferences.completedRatio = completedEntries.length / allEntries.length;
+            
+            return preferences;
+        }
+
+        function getPersonalizedRecommendations(preferences) {
+            let recommendations = [];
+            
+            // Если у пользователя мало записей, показываем популярные из всех категорий
+            if (preferences.totalEntries < 5) {
+                const allRecs = [];
+                for (const [type, recs] of Object.entries(recommendationsDatabase)) {
+                    const shuffled = [...recs].sort(() => Math.random() - 0.5).slice(0, 2);
+                    shuffled.forEach(rec => {
+                        allRecs.push({...rec, type: type});
+                    });
+                }
+                recommendations = allRecs.sort(() => Math.random() - 0.5).slice(0, 8);
+            } else {
+                // Основной алгоритм рекомендаций
+                const favoriteTypeRecs = recommendationsDatabase[preferences.favoriteType] || [];
+                
+                // Сортируем по рейтингу (если пользователь ставит высокие оценки)
+                let sortedRecs = [...favoriteTypeRecs];
+                if (preferences.avgRating >= 4) {
+                    sortedRecs.sort((a, b) => b.score - a.score);
+                } else {
+                    sortedRecs.sort(() => Math.random() - 0.5);
+                }
+                
+                // Берем первые 6-8 рекомендаций из любимого типа
+                const mainRecs = sortedRecs.slice(0, preferences.completedRatio > 0.5 ? 8 : 6)
+                    .map(rec => ({...rec, type: preferences.favoriteType}));
+                
+                // Добавляем 2-4 рекомендации из других категорий для разнообразия
+                const otherTypes = ['anime', 'manga', 'movies', 'series'].filter(t => t !== preferences.favoriteType);
+                const additionalRecs = [];
+                
+                otherTypes.forEach(type => {
+                    const typeRecs = recommendationsDatabase[type];
+                    if (typeRecs && typeRecs.length > 0) {
+                        const randomRec = typeRecs[Math.floor(Math.random() * typeRecs.length)];
+                        additionalRecs.push({...randomRec, type: type});
+                    }
+                });
+                
+                // Объединяем и перемешиваем
+                recommendations = [...mainRecs, ...additionalRecs.slice(0, 2)]
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 8);
+            }
+            
+            return recommendations;
         }
 
         function changeThemeColor(color) {
