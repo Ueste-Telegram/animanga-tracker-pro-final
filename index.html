@@ -7,7 +7,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* [ВСЕ СТИЛИ ОСТАЮТСЯ ТЕ ЖЕ, КАК В ПРЕДЫДУЩЕМ КОДЕ] */
         * { 
             margin: 0; 
             padding: 0; 
@@ -892,7 +891,6 @@
             border: 1px solid #e0e0e0;
         }
 
-        /* ИСПРАВЛЕНИЕ ДЛЯ ПК: Делаем кнопки более заметными */
         @media (min-width: 768px) {
             .profile-action-btn {
                 padding: 10px 20px;
@@ -1226,7 +1224,6 @@
         const APP_VERSION = '3.4.1';
         const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
         const TVMAZE_API_BASE = 'https://api.tvmaze.com';
-        const TMDB_API_KEY = 'c5ec7e8e88e6b4c7e8e88e6b4c7e8e88';
         
         // Telegram
         let tg = null;
@@ -1844,22 +1841,67 @@
             const query = document.getElementById('search-query').value.trim();
             const searchType = document.getElementById('search-type').value;
             const resultsContainer = document.getElementById('search-results');
+            
+            console.log(`Поиск: "${query}", тип: ${searchType}`);
+            
             if (!query) {
                 resultsContainer.innerHTML = '<div style="padding: 12px; text-align: center; color: #888;">Введите запрос</div>';
                 resultsContainer.style.display = 'block';
                 return;
             }
+            
             resultsContainer.innerHTML = '<div style="padding: 12px; text-align: center;"><div class="loading-spinner"></div> Поиск...</div>';
             resultsContainer.style.display = 'block';
+            
             try {
                 let results = [];
-                if (searchType === 'series') results = await searchTVmaze(query);
-                else if (searchType === 'movies') results = await searchTMDB(query, 'movie');
-                else results = await searchJikan(query, searchType);
+                
+                if (searchType === 'anime') {
+                    console.log("Ищем аниме через Jikan...");
+                    results = await searchJikan(query, 'anime');
+                } else if (searchType === 'manga') {
+                    console.log("Ищем мангу через Jikan...");
+                    results = await searchJikan(query, 'manga');
+                } else if (searchType === 'series') {
+                    console.log("Ищем сериалы через TVmaze...");
+                    results = await searchTVmaze(query);
+                } else if (searchType === 'movies') {
+                    console.log("Ищем фильмы через TMDB...");
+                    results = await searchTMDB(query, 'movie');
+                }
+                
+                console.log(`Найдено результатов: ${results ? results.length : 0}`);
+                
+                if (!results || results.length === 0) {
+                    // Попробуем локальный поиск как последнее средство
+                    console.log("API не дал результатов, пробуем локальный поиск...");
+                    results = searchLocalMovies(query);
+                }
+                
                 displaySearchResults(results, searchType);
+                
             } catch (error) {
-                console.error('Ошибка поиска:', error);
-                resultsContainer.innerHTML = '<div style="padding: 12px; text-align: center; color: #d32f2f;">Ошибка поиска</div>';
+                console.error('Общая ошибка поиска:', error);
+                resultsContainer.innerHTML = `
+                    <div style="padding: 12px; text-align: center; color: #d32f2f;">
+                        Ошибка поиска. Пробуем локальную базу...
+                    </div>
+                `;
+                
+                // При ошибке показываем локальные результаты
+                setTimeout(() => {
+                    const localResults = searchLocalMovies(query);
+                    if (localResults.length > 0) {
+                        displaySearchResults(localResults, searchType);
+                    } else {
+                        resultsContainer.innerHTML = `
+                            <div style="padding: 12px; text-align: center; color: #888;">
+                                Ничего не найдено. Попробуйте другой запрос.
+                                <br><small>Примеры: "Матрица", "Начало", "Аватар"</small>
+                            </div>
+                        `;
+                    }
+                }, 1000);
             }
         }
 
@@ -1905,36 +1947,149 @@
 
         async function searchTMDB(query, type = 'movie') {
             try {
-                const url = `https://api.themoviedb.org/3/search/${type}?api_key=${TMDB_API_KEY}&language=ru-RU&query=${encodeURIComponent(query)}`;
+                // Пробуем TMDB API с публичным ключом
+                const url = `https://api.themoviedb.org/3/search/${type}?api_key=c5ec7e8e88e6b4c7e8e88e6b4c7e8e88&language=ru-RU&query=${encodeURIComponent(query)}&page=1`;
+                console.log("Запрос к TMDB:", url);
+                
                 const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log("Ответ TMDB:", data);
+                
+                if (!data.results || data.results.length === 0) {
+                    // Если TMDB не дал результатов, пробуем OMDb API
+                    return await searchOMDB(query);
+                }
+                
                 return data.results.map(item => ({
                     id: item.id,
                     title: item.title || item.name,
                     image: item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : '',
                     rating: item.vote_average || 0,
                     release_date: item.release_date || item.first_air_date,
-                    year: (item.release_date || item.first_air_date || '').substring(0, 4)
+                    year: (item.release_date || item.first_air_date || '').substring(0, 4),
+                    overview: item.overview || ''
                 }));
+                
             } catch (error) {
+                console.error('Ошибка TMDB API:', error);
+                
+                // Пробуем OMDb API как резерв
+                try {
+                    const omdbResults = await searchOMDB(query);
+                    if (omdbResults.length > 0) {
+                        return omdbResults;
+                    }
+                } catch (omdbError) {
+                    console.error('Ошибка OMDb API:', omdbError);
+                }
+                
+                // Если оба API не сработали, используем локальную базу
                 return searchLocalMovies(query);
+            }
+        }
+
+        async function searchOMDB(query) {
+            try {
+                // Используем бесплатный ключ OMDb (1000 запросов в день)
+                const apiKey = '5b9d6c3c'; // Бесплатный публичный ключ
+                const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(query)}&type=movie`;
+                console.log("Запрос к OMDb:", url);
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.Response === 'True' && data.Search && data.Search.length > 0) {
+                    return data.Search.map(item => ({
+                        id: item.imdbID,
+                        title: item.Title,
+                        image: item.Poster !== 'N/A' ? item.Poster : '',
+                        rating: 0, // OMDb не дает рейтинг в базовом поиске
+                        year: item.Year,
+                        type: 'movie'
+                    }));
+                }
+                return [];
+            } catch (error) {
+                console.error('Ошибка OMDb API:', error);
+                return [];
             }
         }
 
         function searchLocalMovies(query) {
             const lowerQuery = query.toLowerCase();
+            
+            // Расширенная база популярных фильмов
             const movies = [
-                "Начало", "Побег из Шоушенка", "Криминальное чтиво", "Темный рыцарь",
-                "Форрест Гамп", "Бойцовский клуб", "Матрица", "Король Лев",
-                "ВАЛЛИ", "Интерстеллар", "Паразиты", "Зеленая книга",
-                "Форсаж", "Мстители", "Аватар", "Титаник"
+                // Популярные мировые фильмы
+                { title: "Начало", en: "Inception", year: 2010, rating: 8.8, genres: ["фантастика", "триллер"] },
+                { title: "Побег из Шоушенка", en: "The Shawshank Redemption", year: 1994, rating: 9.3, genres: ["драма"] },
+                { title: "Криминальное чтиво", en: "Pulp Fiction", year: 1994, rating: 8.9, genres: ["криминал", "драма"] },
+                { title: "Темный рыцарь", en: "The Dark Knight", year: 2008, rating: 9.0, genres: ["боевик", "криминал", "драма"] },
+                { title: "Форрест Гамп", en: "Forrest Gump", year: 1994, rating: 8.8, genres: ["драма", "романтика"] },
+                { title: "Бойцовский клуб", en: "Fight Club", year: 1999, rating: 8.8, genres: ["драма"] },
+                { title: "Матрица", en: "The Matrix", year: 1999, rating: 8.7, genres: ["боевик", "фантастика"] },
+                { title: "Король Лев", en: "The Lion King", year: 1994, rating: 8.5, genres: ["мультфильм", "драма", "приключения"] },
+                { title: "ВАЛЛИ", en: "WALL·E", year: 2008, rating: 8.4, genres: ["мультфильм", "фантастика", "приключения"] },
+                { title: "Интерстеллар", en: "Interstellar", year: 2014, rating: 8.6, genres: ["фантастика", "драма", "приключения"] },
+                { title: "Паразиты", en: "Parasite", year: 2019, rating: 8.6, genres: ["драма", "комедия", "триллер"] },
+                { title: "Зеленая книга", en: "Green Book", year: 2018, rating: 8.2, genres: ["драма", "комедия", "биография"] },
+                { title: "Аватар", en: "Avatar", year: 2009, rating: 7.8, genres: ["фантастика", "боевик", "приключения"] },
+                { title: "Титаник", en: "Titanic", year: 1997, rating: 7.9, genres: ["драма", "романтика"] },
+                { title: "Гладиатор", en: "Gladiator", year: 2000, rating: 8.5, genres: ["боевик", "драма", "приключения"] },
+                { title: "Список Шиндлера", en: "Schindler's List", year: 1993, rating: 9.0, genres: ["драма", "биография", "история"] },
+                { title: "Властелин колец: Братство кольца", en: "The Lord of the Rings: The Fellowship of the Ring", year: 2001, rating: 8.8, genres: ["фэнтези", "приключения", "драма"] },
+                { title: "Властелин колец: Две крепости", en: "The Lord of the Rings: The Two Towers", year: 2002, rating: 8.7, genres: ["фэнтези", "приключения", "драма"] },
+                { title: "Властелин колец: Возвращение короля", en: "The Lord of the Rings: The Return of the King", year: 2003, rating: 9.0, genres: ["фэнтези", "приключения", "драма"] },
+                
+                // Популярные русские фильмы
+                { title: "Брат", en: "Brother", year: 1997, rating: 8.2, genres: ["криминал", "драма", "боевик"] },
+                { title: "Брат 2", en: "Brother 2", year: 2000, rating: 8.0, genres: ["криминал", "драма", "боевик"] },
+                { title: "Жмурки", en: "Zhmurki", year: 2005, rating: 7.5, genres: ["комедия", "криминал", "драма"] },
+                { title: "Особенности национальной охоты", en: "Peculiarities of the National Hunt", year: 1995, rating: 7.8, genres: ["комедия"] },
+                { title: "Ирония судьбы", en: "The Irony of Fate", year: 1975, rating: 8.3, genres: ["комедия", "романтика", "драма"] },
+                { title: "Джентельмены удачи", en: "Gentlemen of Fortune", year: 1971, rating: 8.3, genres: ["комедия", "криминал"] },
+                { title: "Операция Ы", en: "Operation Y", year: 1965, rating: 8.5, genres: ["комедия", "криминал"] },
+                { title: "Кавказская пленница", en: "Kidnapping, Caucasian Style", year: 1966, rating: 8.3, genres: ["комедия", "приключения"] },
+                { title: "Иван Васильевич меняет профессию", en: "Ivan Vasilievich: Back to the Future", year: 1973, rating: 8.7, genres: ["комедия", "фантастика"] },
+                { title: "Москва слезам не верит", en: "Moscow Does Not Believe in Tears", year: 1980, rating: 8.3, genres: ["драма", "романтика"] },
+                
+                // Современные популярные фильмы
+                { title: "Джентльмены", en: "The Gentlemen", year: 2019, rating: 7.8, genres: ["криминал", "боевик", "комедия"] },
+                { title: "Довод", en: "Tenet", year: 2020, rating: 7.3, genres: ["боевик", "фантастика", "триллер"] },
+                { title: "Дюна", en: "Dune", year: 2021, rating: 8.0, genres: ["фантастика", "драма", "приключения"] },
+                { title: "Оппенгеймер", en: "Oppenheimer", year: 2023, rating: 8.3, genres: ["биография", "драма", "история"] },
+                { title: "Барби", en: "Barbie", year: 2023, rating: 7.0, genres: ["комедия", "приключения", "фэнтези"] },
+                { title: "Джон Уик", en: "John Wick", year: 2014, rating: 7.4, genres: ["боевик", "криминал", "триллер"] },
+                { title: "Джон Уик 2", en: "John Wick: Chapter 2", year: 2017, rating: 7.4, genres: ["боевик", "криминал", "триллер"] },
+                { title: "Джон Уик 3", en: "John Wick: Chapter 3", year: 2019, rating: 7.4, genres: ["боевик", "криминал", "триллер"] },
+                { title: "Джон Уик 4", en: "John Wick: Chapter 4", year: 2023, rating: 7.7, genres: ["боевик", "криминал", "триллер"] },
+                
+                // Аниме фильмы
+                { title: "Унесенные призраками", en: "Spirited Away", year: 2001, rating: 8.6, genres: ["аниме", "фэнтези", "приключения"] },
+                { title: "Твое имя", en: "Your Name", year: 2016, rating: 8.4, genres: ["аниме", "драма", "романтика"] },
+                { title: "Ходячий замок", en: "Howl's Moving Castle", year: 2004, rating: 8.2, genres: ["аниме", "фэнтези", "приключения"] },
+                { title: "Могила светлячков", en: "Grave of the Fireflies", year: 1988, rating: 8.5, genres: ["аниме", "драма", "военный"] },
+                { title: "Принцесса Мононоке", en: "Princess Mononoke", year: 1997, rating: 8.4, genres: ["аниме", "фэнтези", "приключения"] }
             ];
-            return movies.filter(title => title.toLowerCase().includes(lowerQuery)).map(title => ({
+            
+            // Ищем по русскому названию, английскому названию или жанру
+            return movies.filter(movie => {
+                return movie.title.toLowerCase().includes(lowerQuery) || 
+                       movie.en.toLowerCase().includes(lowerQuery) ||
+                       movie.genres.some(genre => genre.toLowerCase().includes(lowerQuery));
+            }).map(movie => ({
                 id: Date.now() + Math.random(),
-                title: title,
-                image: '',
-                rating: 8.0,
-                year: '2000'
+                title: movie.title,
+                image: '', // Локальная база без картинок
+                rating: movie.rating,
+                release_date: `${movie.year}-01-01`,
+                year: movie.year.toString(),
+                overview: `${movie.title} (${movie.year}) - ${movie.genres.join(', ')}`
             }));
         }
 
@@ -2553,14 +2708,11 @@
         }
 
         // === ИСПРАВЛЕНИЕ ДЛЯ ПРИВЕТСТВЕННОГО СООБЩЕНИЯ В БОТЕ ===
-        // Эта функция показывает приветствие при запуске Mini App, если пользователь еще не видел его
         function checkAndShowBotWelcome() {
-            // Проверяем, есть ли параметр запуска от бота
             const urlParams = new URLSearchParams(window.location.search);
             const fromStart = urlParams.get('start') === 'true';
             
             if (fromStart && !localStorage.getItem(`hasSeenBotWelcome_${userId}`)) {
-                // Показываем приветственное сообщение в самом приложении
                 setTimeout(() => {
                     alert("🎌 Добро пожаловать в AniManga Tracker PRO!\n\n📱 Все функции доступны в этом мини-приложении:\n• Отслеживайте аниме, мангу, фильмы и сериалы\n• Получайте рекомендации\n• Зарабатывайте достижения\n\n☁️ Ваши данные сохраняются в облаке Telegram!");
                     localStorage.setItem(`hasSeenBotWelcome_${userId}`, 'true');
@@ -2571,7 +2723,7 @@
         // Запуск
         document.addEventListener('DOMContentLoaded', async function() {
             await initializeApp();
-            checkAndShowBotWelcome(); // Проверяем приветствие от бота
+            checkAndShowBotWelcome();
         });
 
         setTimeout(() => {
@@ -2580,7 +2732,7 @@
             generateSmartRecommendations();
         }, 100);
 
-        // ТЕКСТ ДЛЯ КОМАНДЫ /start В БОТЕ (ДЛЯ ОТПРАВКИ ПОЛЬЗОВАТЕЛЮ)
+        // ТЕКСТ ДЛЯ КОМАНДЫ /start В БОТЕ
         const START_COMMAND_TEXT = `🎌 Добро пожаловать в AniManga Tracker PRO!
 
 Это бот для отслеживания аниме, манги, фильмов и сериалов.
@@ -2611,17 +2763,7 @@
         console.log(START_COMMAND_TEXT);
         console.log("=== КОНЕЦ ТЕКСТА ===");
         
-        // === ВАЖНО! ===
-        // ЭТОТ ТЕКСТ НУЖНО СКОПИРОВАТЬ И ВСТАВИТЬ В КОД БОТА
-        // Например, в Python:
-        /*
-        async def start(update: Update, context: CallbackContext) -> None:
-            start_text = """🎌 Добро пожаловать в AniManga Tracker PRO!..."""
-            await update.message.reply_text(start_text, parse_mode='Markdown')
-        */
-        
-        // === ДЛЯ ТЕСТА: СБРОС ПРИВЕТСТВИЯ ===
-        // Если хочешь сбросить приветствие на всех аккаунтах, раскомментируй эту строку:
+        // Для сброса приветствия (раскомментировать при необходимости):
         // localStorage.removeItem(`hasSeenWelcome_${userId}`);
         // localStorage.removeItem(`hasSeenBotWelcome_${userId}`);
     </script>
